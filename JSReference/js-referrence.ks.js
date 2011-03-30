@@ -2,6 +2,8 @@ var PLUGIN_INFO =
         <KeySnailPlugin>
             <name>JsReferrence</name>
             <description>JavaScriptリファレンスを引く</description>
+            <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
+            <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
             <version>0.0.1</version>
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
