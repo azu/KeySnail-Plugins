@@ -1,0 +1,3 @@
+[submodule "nicontroller"]
+	path = nicontroller
+	url = git@github.com:azu/keysnail-plugin.git
