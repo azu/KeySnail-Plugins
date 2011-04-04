@@ -2,6 +2,7 @@ var PLUGIN_INFO =
         <KeySnailPlugin>
             <name>LinkDownloads</name>
             <description>リンクから選択してダウンロード</description>
+            <include>main</include>
             <version>0.0.1</version>
             <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/LinkDownloads/link-downloads.ks.js</updateURL>
             <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/LinkDownloads/MyIcon.png</iconURL>
@@ -10,11 +11,24 @@ var PLUGIN_INFO =
             <provides>
                 <ext>downloads-open-prompt</ext>
             </provides>
+            <options>
+                <option>
+                    <name>linkdownload.direcotry_path</name>
+                    <type>string</type>
+                    <description>set download directry path</description>
+                    <description lang="ja">ダウンロードするディレクトリのパスを設定</description>
+                </option>
+            </options>
             <detail><![CDATA[]]></detail>
             <detail lang="ja"><![CDATA[
             === 使い方 ===
             downloads-open-prompt をキーにセットするか、
             エクステ一覧からdownloads-open-prompt実行する。
+            また、プロンプトなしで直接ダウンロードする場合は以下のように、ダウンロードディレクトリを指定する必要があります。
+            >||
+            // .keysnail.jsに記述
+            plugins.options["linkdownload.direcotry_path"] = "d:\\Downloads";
+            ||<
            ]]></detail>
         </KeySnailPlugin>;
 function downloads(win, doc) {
@@ -45,7 +59,11 @@ function downloads(win, doc) {
         }
     }
 
-    function saveFilebyElement(elem) {// I dont need prompt option
+    function saveFilebyElement(elem) {
+        if (!plugins.options["linkdownload.direcotry_path"]) {
+            display.prettyPrint('Please set "linkdownload.direcotry_path"');
+            throw 'Please set "linkdownload.direcotry_path"';
+        }
         var doc = elem.ownerDocument;
         var elemSrc = elem.href ? elem.href : elem.src;
         var url = window.makeURLAbsolute(elem.baseURI, elemSrc);
@@ -62,7 +80,7 @@ function downloads(win, doc) {
             var obj_TargetFile = Components.classes["@mozilla.org/file/local;1"]
                     .createInstance(Components.interfaces.nsILocalFile);
             //set file with path
-            obj_TargetFile.initWithPath("D:\\pic");
+            obj_TargetFile.initWithPath(plugins.options["linkdownload.direcotry_path"]);
             obj_TargetFile.append(leafname);
             //if file doesn't exist, create
             if (!obj_TargetFile.exists()) {
