@@ -9,7 +9,7 @@ var PLUGIN_INFO =
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
             <provides>
-                <ext>downloads-open-prompt</ext>
+                <ext>linkdownloads-open-prompt</ext>
             </provides>
             <options>
                 <option>
@@ -137,7 +137,7 @@ function downloads(win, doc) {
     };
 }
 // コマンド追加
-ext.add("downloads-open-prompt",
+ext.add("linkdownloads-open-prompt",
         openPrompt,
         M({ja: "リンクからダウンロード候補を検索",
             en: "search for download form links"}));
