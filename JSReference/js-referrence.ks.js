@@ -5,6 +5,7 @@ var PLUGIN_INFO =
             <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
             <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
             <version>0.0.1</version>
+            <minVersion>1.8.5</minVersion>
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
             <provides>
@@ -17,7 +18,7 @@ var PLUGIN_INFO =
 このプラグインをインストールすることにより
 - JsReferrence-open-prompt
 - JsReferrence-reIndex
-というのがエクステに追加されます。
+というコマンドがエクステに追加されます。
 初回にJsReferrence-open-promptを実行するIndexを構築します。
 手動でIndexを作り直したい時はJsReferrence-reIndexコマンドを使って下さい。
 >|javascript|
@@ -140,7 +141,7 @@ function req(target, callback, next) {
 }
 function openPrompt() {
     var indexPages = crawler.getIndex();
-    if(_.isEmpty(indexPages)){
+    if (_.isEmpty(indexPages)) {
         display.showPopup(saveKey, M({
             ja:"Indexがないので構築します…しばしお待ち",
             en:"No Index,start building index."
