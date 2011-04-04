@@ -13,7 +13,7 @@ var PLUGIN_INFO =
             </provides>
             <options>
                 <option>
-                    <name>linkdownload.direcotry_path</name>
+                    <name>linkdownloads.direcotry_path</name>
                     <type>string</type>
                     <description>set download directry path</description>
                     <description lang="ja">ダウンロードするディレクトリのパスを設定</description>
@@ -26,7 +26,7 @@ downloads-open-prompt をキーにセットするか、エクステ一覧からd
 また、プロンプトなしで直接ダウンロードする場合は以下のように、ダウンロードディレクトリを指定する必要があります。
 >||
 // .keysnail.jsに記述
-plugins.options["linkdownload.direcotry_path"] = "d:\\Downloads";
+plugins.options["linkdownloads.direcotry_path"] = "d:\\Downloads";
 ||<
 ]]></detail>
         </KeySnailPlugin>;
@@ -59,9 +59,9 @@ function downloads(win, doc) {
     }
 
     function saveFilebyElement(elem) {
-        if (!plugins.options["linkdownload.direcotry_path"]) {
-            display.prettyPrint('Please set "linkdownload.direcotry_path"');
-            throw 'Please set "linkdownload.direcotry_path"';
+        if (!plugins.options["linkdownloads.direcotry_path"]) {
+            display.prettyPrint('Please set "linkdownloads.direcotry_path"');
+            throw 'Please set "linkdownloads.direcotry_path"';
         }
         var doc = elem.ownerDocument;
         var elemSrc = elem.href ? elem.href : elem.src;
@@ -79,7 +79,7 @@ function downloads(win, doc) {
             var obj_TargetFile = Components.classes["@mozilla.org/file/local;1"]
                     .createInstance(Components.interfaces.nsILocalFile);
             //set file with path
-            obj_TargetFile.initWithPath(plugins.options["linkdownload.direcotry_path"]);
+            obj_TargetFile.initWithPath(plugins.options["linkdownloads.direcotry_path"]);
             obj_TargetFile.append(leafname);
             //if file doesn't exist, create
             if (!obj_TargetFile.exists()) {
@@ -166,19 +166,17 @@ function openPrompt() {
         style      : [null, style.prompt.description],
         header     : ["Title", "URL"],
         width      : [25, 45],
-        beforeSelection : function () {
-            if (selectedIndex) {
-                var targetElement = getLinkElement(selectedIndex);
-                targetElement.classList.remove("keysnail-element-select");
-            }
-        },
-        afterSelection : function (arg) {
-            var index = arg.i;
-            if (index) {
-                selectedIndex = index;
+        onChange: function (arg) {
+            // TODO : 初回の要素のクラスがなぜか残る
+            var index = arg.index;
+            if (selectedIndex !== index) {
                 var targetElement = getLinkElement(index);
                 targetElement.classList.add("keysnail-element-select");
                 context.scrollToElement(targetElement);
+                if (selectedIndex) {
+                    getLinkElement(selectedIndex).classList.remove("keysnail-element-select");
+                }
+                selectedIndex = index;
             }
         },
         onFinish:function (arg) {
