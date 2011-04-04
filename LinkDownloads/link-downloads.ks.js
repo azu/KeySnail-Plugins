@@ -21,15 +21,14 @@ var PLUGIN_INFO =
             </options>
             <detail><![CDATA[]]></detail>
             <detail lang="ja"><![CDATA[
-            === 使い方 ===
-            downloads-open-prompt をキーにセットするか、
-            エクステ一覧からdownloads-open-prompt実行する。
-            また、プロンプトなしで直接ダウンロードする場合は以下のように、ダウンロードディレクトリを指定する必要があります。
-            >||
-            // .keysnail.jsに記述
-            plugins.options["linkdownload.direcotry_path"] = "d:\\Downloads";
-            ||<
-           ]]></detail>
+=== 使い方 ===
+downloads-open-prompt をキーにセットするか、エクステ一覧からdownloads-open-prompt実行する。
+また、プロンプトなしで直接ダウンロードする場合は以下のように、ダウンロードディレクトリを指定する必要があります。
+>||
+// .keysnail.jsに記述
+plugins.options["linkdownload.direcotry_path"] = "d:\\Downloads";
+||<
+]]></detail>
         </KeySnailPlugin>;
 function downloads(win, doc) {
     var _cache = {};
