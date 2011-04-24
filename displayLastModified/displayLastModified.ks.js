@@ -26,6 +26,9 @@ let PLUGIN_INFO =
 key.setViewKey(['C-b', 'l'], function (ev, arg) {
     ext.exec('displayLastModified-URL', arg, ev);
 }, 'ページの最終更新日を表示', true);
+key.setViewKey(['C-b', 's'], function (ev, arg) {
+    ext.exec('displayLastModified-URL', "http://efcl.info/");
+}, '指定URLの最終更新日を表示', true);
 ||<
        ]]></detail>
         </KeySnailPlugin>;
@@ -42,12 +45,10 @@ function displayLastModifiedURL() {
             }
         }
     }
-    fbug(request.url)
     function getLastModified(doc) {
         var siteList = $X('//div[@class="vsc"]', doc);
         for (var i = 0,len = siteList.length; i < len; i++) {
             var site = siteList[i];
-            fbug(site);
             if (site && !_.isElement(site)) {
                 return log("siteがなかった…");
             }
