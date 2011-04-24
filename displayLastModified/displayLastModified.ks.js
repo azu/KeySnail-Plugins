@@ -29,34 +29,38 @@ key.setViewKey(['C-b', 'l'], function (ev, arg) {
 ||<
        ]]></detail>
         </KeySnailPlugin>;
-function displayLastModifiedURL(requestURL) {
-    requestURL = requestURL || window.content.location.href;
+function displayLastModifiedURL() {
+    var requestURL = arguments[1] || window.content.location.href;
     var request = {
         url :"http://www.google.com/search?num=1&tbs=qdr%3Ay15&q=site%3A" + encodeURIComponent(requestURL),
         onload : function(doc) {
             var dayText = getLastModified(doc);
             if (!dayText) {
                 display.prettyPrint(L("×"), { timeout:500, fade:500 })
-                return;
+            } else {
+                display.prettyPrint(dayText);// 日付を表示
             }
-            display.prettyPrint(dayText);// 日付を表示
         }
     }
-
+    fbug(request.url)
     function getLastModified(doc) {
         var siteList = $X('//div[@class="vsc"]', doc);
-        if (siteList && !_.isElement(siteList[0])) {
-            return log("siteListがなかった…");
+        for (var i = 0,len = siteList.length; i < len; i++) {
+            var site = siteList[i];
+            fbug(site);
+            if (site && !_.isElement(site)) {
+                return log("siteがなかった…");
+            }
+            var lastModifyElement = $X('.//span[@class="f std"]', site);
+            if (lastModifyElement && _.isElement(lastModifyElement[0])) {
+                return lastModifyElement[0].textContent;
+            }
         }
-        var lastModifyElement = $X('.//span[@class="f std"]', siteList[0]);
-        if (lastModifyElement && _.isElement(lastModifyElement[0])) {
-            return lastModifyElement[0].textContent;
-        }
+
     }
 
     req(request);
 }
-;
 ext.add("displayLastModified-URL",
         displayLastModifiedURL,
         M({ja: "ページの最終更新日を表示",
