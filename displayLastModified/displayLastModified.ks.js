@@ -41,7 +41,7 @@ function displayLastModifiedURL() {
             if (!dayText) {
                 display.prettyPrint(L("×"), { timeout:500, fade:500 })
             } else {
-                display.prettyPrint(dayText);// 日付を表示
+                display.prettyPrint(dayText, { timeout:3000, fade:300 });// 日付を表示
             }
         }
     }
