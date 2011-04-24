@@ -26,9 +26,8 @@ let PLUGIN_INFO =
 key.setViewKey(['C-b', 'l'], function (ev, arg) {
     ext.exec('displayLastModified-URL', arg, ev);
 }, 'ページの最終更新日を表示', true);
-key.setViewKey(['C-b', 's'], function (ev, arg) {
-    ext.exec('displayLastModified-URL', "http://efcl.info/");
-}, '指定URLの最終更新日を表示', true);
+// 指定URLの最終更新日を表示するには以下のように引数で渡す
+ext.exec('displayLastModified-URL', "http://efcl.info/");
 ||<
        ]]></detail>
         </KeySnailPlugin>;
