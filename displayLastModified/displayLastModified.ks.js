@@ -36,8 +36,8 @@ function displayLastModifiedURL(requestURL) {
         onload : function(doc) {
             var dayText = getLastModified(doc);
             if (!dayText) {
-                display.prettyPrint("×", { timeout:500, fade:100 });
-                return log("日付を取得できませんでした");
+                display.prettyPrint(L("×"), { timeout:500, fade:500 })
+                return;
             }
             display.prettyPrint(dayText);// 日付を表示
         }
@@ -62,7 +62,9 @@ ext.add("displayLastModified-URL",
         M({ja: "ページの最終更新日を表示",
                     en: "display page's last modified"}));
 function log() {
-    fbug && fbug(arguments);
+    var DEBUG = false;
+    if (DEBUG)
+        fbug && fbug(arguments);
     // util.message(L(arguments));
 }
 function req(target) {
