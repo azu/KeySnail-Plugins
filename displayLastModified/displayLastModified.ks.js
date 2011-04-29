@@ -82,7 +82,7 @@ function req(target) {
         target.next && target.next();
     }
     xhr.open("get", target.url, true);
-    xhr.overrideMimeType("text/html; charset=" + target.charset || "utf-8");
+    xhr.overrideMimeType("text/html; charset=" + (target.charset || "utf-8"));
     xhr.send(null);
 }
 

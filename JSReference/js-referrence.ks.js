@@ -4,7 +4,7 @@ var PLUGIN_INFO =
             <description>JavaScriptリファレンスを引く</description>
             <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
             <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
             <minVersion>1.8.5</minVersion>
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
@@ -44,46 +44,71 @@ crawler = (function() {
     var getIndex = function(domain) {
         return indexArray;
     }
-    var saveIndex = function() {
+    var clearIndex = function() {
+
+    }
+    var saveIndexFile = function() {
         persist.preserve(indexArray, saveKey);
         display.showPopup(saveKey, M({
             ja:"Indexの構築が完了しました",
             en:"Finish index"
         }))
     }
-    var reIndex = function() {
-        var domains = _.keys(crawler.domainFunc);
+    var startIndex = function(domains) {
+        domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
+        if (!domains) {
+            util.message(L("Index構築のドメインが指定されていない"));
+            return;
+        }
+        display.showPopup(saveKey, M({
+            ja: domains.length + "個のIndexを構築します",
+            en:"Start building " + domains.length + " index."
+        }));
+        reIndex(domains);
+    }
+    var reIndex = function(domains) {
         var cd = crawler.domainFunc;
         domainIndexer(domains.pop());
         function domainIndexer(domain) {
             var domainIndex = cd[domain].indexTarget;// URLの配列
-            var target = {
-                "url" : domainIndex.pop(),
-                "charset":  cd[domain].charset || "UTF-8"
-            }
-            req(target, cd[domain].indexer, function next() {
+            var target = getDomainObj(domain);
+            // ドメイン内のindexTargetが無くなるまで再帰的に取得する
+            req(target, function(res) {
+                saveContentIndex(domain, res);
+            }, function next() {
                 if (domainIndex.length > 0) { // 次のtarget pageへ
-                    var target = {
-                        "url":domainIndex.pop(),
-                        "charset":  cd[domain].charset || "UTF-8"
-                    };
-                    req(target, cd[domain].indexer, next);
-                } else {// 次のドメインへ
-                    if (domains.length > 0) {
+                    var target = getDomainObj(domain);
+                    req(target, function(res) {
+                        saveContentIndex(domain, res);
+                    }, next);
+                } else {
+                    if (domains.length > 0) {// 次のドメインへ
                         var nextDomain = domains.pop();
                         domainIndexer(nextDomain);
-                    } else {
-                        saveIndex();
+                    } else {// 取得対象がなくなったのでファイルに保存
+                        saveIndexFile();
                     }
                 }
             });
+            function getDomainObj(domain) {
+                return {
+                    "url" : domainIndex.pop(),
+                    "charset": cd[domain].charset
+                }
+            }
+            // indexerを呼び出して取得結果をpushする
+            function saveContentIndex(domain, doc) {
+                var collection = cd[domain].indexer(doc);
+                crawler.pushIndex(domain, collection);
+            }
+
         }
     }
     return {
         "getIndex" : getIndex,
         "domainFunc": domainFunc,
         "pushIndex" : pushIndex,
-        "reIndex" : reIndex
+        "startIndex" : startIndex
     };
 })();
 // Under Translation of ECMA-262 3rd Edition
@@ -94,19 +119,17 @@ crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
     ],
     indexer : function (doc) {
         var anchors = $X("//dt/a", doc);
-        var index = new Array(anchors.length);
         // http://d.hatena.ne.jp/brazil/20080416/1208325257
         var IOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
         var uri = IOService.newURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html", null, null).QueryInterface(Ci.nsIURL);
         var collection = [];
-        for (var i = 0, len = index.length; i < len; i++) {
+        for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var name = a.textContent.replace(/^[\d\s.]*/, "");
             var url = uri.resolve(a.getAttribute("href"));
             collection.push([name ,url]);
         }
-        crawler.pushIndex("www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/", collection);
-        return null;
+        return collection;
     }
 };
 // MDC
@@ -123,8 +146,7 @@ crawler.domainFunc["developer.mozilla.org"] = {
             var url = a.href;
             collection.push([name ,url]);
         }
-        crawler.pushIndex("developer.mozilla.org", collection);
-        return this;
+        return collection;
     }
 };
 
@@ -136,7 +158,7 @@ function req(target, callback, next) {
         next();
     }
     xhr.open("get", target.url, true);
-    xhr.overrideMimeType("text/html; charset=" + target.charset);
+    xhr.overrideMimeType("text/html; charset=" + (target.charset || "utf-8"));
     xhr.send(null);
 }
 function openPrompt() {
@@ -146,7 +168,7 @@ function openPrompt() {
             ja:"Indexがないので構築します…しばしお待ち",
             en:"No Index,start building index."
         }));
-        crawler.reIndex();
+        crawler.startIndex();
         return;
     }
     var collection = [];
@@ -197,7 +219,9 @@ function openPrompt() {
 }
 // コマンド追加
 ext.add(saveKey + "-reIndex",
-        crawler.reIndex,
+        function(aEvent, aArg) {
+            crawler.startIndex(aArg || null);
+        },
         M({ja: saveKey + "のインデックスを作り直す",
             en: "reindex of" + saveKey}));
 ext.add(saveKey + "-open-prompt",
