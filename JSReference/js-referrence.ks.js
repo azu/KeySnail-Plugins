@@ -58,6 +58,8 @@ crawler.domainFunc["DOMAIN_NAME_SPACE"] = {
         return collection;
     }
 }
+更新履歴はGithubのReadme.mdに書いてあります。
+https://github.com/azu/KeySnail-Plugins/tree/master/JSReference
 ||<
 ]]></detail>
         </KeySnailPlugin>;

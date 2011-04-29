@@ -24,3 +24,20 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
             return collection;
         }
     }
+
+
+##更新履歴
+ 
+ * ver 0.0.2
+    api.jquery.com 対応
+    JsReferrence-open-promptコマンドで任意のサイトのみを対象に検索できるようになった。
+    引数にドメイン名前空間の配列を渡す。
+
+
+    key.setGlobalKey(['C-b', 'l'], function (ev, arg) {
+        ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org", "www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"], ev);
+    }, 'JsReferrenceのプロンプトを開く', true);
+
+
+ * ver 0.0.1
+     リリース
