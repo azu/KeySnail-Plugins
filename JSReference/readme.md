@@ -10,6 +10,7 @@
 [api.jquery.com]: http://api.jquery.com "jQuery API Document"
 
 対応サイトの増やし方はjs-referrence.ks.js内のSITEINFO付近に以下のような感じで増やしていきます。
+
 DOMAIN_NAME_SPACEはユニークなものにする必要があるので、そのサイトのドメインなどを使うのが最適でしょう
 
     crawler.domainFunc["DOMAIN_NAME_SPACE"] = {
@@ -28,16 +29,17 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
 
 ##更新履歴
  
- * ver 0.0.2
-    api.jquery.com 対応
-    JsReferrence-open-promptコマンドで任意のサイトのみを対象に検索できるようになった。
-    引数にドメイン名前空間の配列を渡す。
+####ver 0.0.2
+api.jquery.com 対応
 
+JsReferrence-open-promptコマンドで任意のサイトのみを対象に検索できるようになった。
+
+引数にドメイン名前空間の配列を渡す。
 
     key.setGlobalKey(['C-b', 'l'], function (ev, arg) {
         ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org", "www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"], ev);
     }, 'JsReferrenceのプロンプトを開く', true);
 
+####ver 0.0.1
 
- * ver 0.0.1
-     リリース
+リリース
