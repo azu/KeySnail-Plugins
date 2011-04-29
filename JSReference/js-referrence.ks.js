@@ -29,6 +29,34 @@ key.setGlobalKey(['C-b', 'r'], function (ev, arg) {
     ext.exec("JsReferrence-reIndex", arg, ev);
 }, 'JsReferrenceののインデックスを作り直す', true);
 ||<
+またJsReferrence-open-promptには引数として、候補に表示するドメインの"配列"を指定できます。
+無指定の場合は全てのサイトから検索を行います。
+>|javascript|
+// developer.mozilla.org だけを候補にする例
+key.setGlobalKey(['C-b', 'k'], function (ev, arg) {
+    ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org"], ev);
+}, 'JsReferrenceのプロンプトを開く', true);
+// 二つのサイトを候補にする
+key.setGlobalKey(['C-b', 'l'], function (ev, arg) {
+    ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org", "www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"], ev);
+}, 'JsReferrenceのプロンプトを開く', true);
+||<
+取得候補を足すにはSITEINFO部分次のような書式でパースしてIndexを作成するものを書きます。
+Pull Requestしてくれればデフォルトに取り入れるかもしれないです。
+>|javascript|
+crawler.domainFunc["DOMAIN_NAME_SPACE"] = {
+    charset : "UTF-8",// 無指定だとUTF-8
+    indexTarget : ["http://" ,"http://"],// 取得したいURLの配列
+    indexer : function(doc){// documetオブジェクトが引数に渡されます
+        var collection = [];// indexerで返す配列
+        // パースして、候補毎にタイトルとURLの配列を作りpushします。
+            collection.push([title ,url]);
+        // 候補もまた配列なので次のような感じで配列内に配列を並べたものを返す
+        // [[title ,url],[title ,url]...]
+        return collection;
+    }
+}
+||<
 ]]></detail>
         </KeySnailPlugin>;
 
@@ -41,8 +69,18 @@ crawler = (function() {
     var pushIndex = function(domain, collection) {
         indexArray[domain] = collection;
     }
-    var getIndex = function(domain) {
-        return indexArray;
+    var getIndex = function(domains) {
+        if (!domains) {// 指定なしならreturn ALL
+            return indexArray;
+        }
+        var selectedIndex = {};
+        for (var i = 0,len = domains.length; i < len; i++) {
+            var domain = domains[i];
+            if (indexArray[domain]) {
+                selectedIndex[domain] = indexArray[domain];
+            }
+        }
+        return selectedIndex;
     }
     var clearIndex = function() {
 
@@ -96,6 +134,7 @@ crawler = (function() {
                     "charset": cd[domain].charset
                 }
             }
+
             // indexerを呼び出して取得結果をpushする
             function saveContentIndex(domain, doc) {
                 var collection = cd[domain].indexer(doc);
@@ -111,6 +150,9 @@ crawler = (function() {
         "startIndex" : startIndex
     };
 })();
+/*
+ * SITE INFO
+ */
 // Under Translation of ECMA-262 3rd Edition
 crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
     charset : "Shift-jis",
@@ -125,9 +167,9 @@ crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
         var collection = [];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
-            var name = a.textContent.replace(/^[\d\s.]*/, "");
+            var title = a.textContent.replace(/^[\d\s.]*/, "");
             var url = uri.resolve(a.getAttribute("href"));
-            collection.push([name ,url]);
+            collection.push([title ,url]);
         }
         return collection;
     }
@@ -142,14 +184,30 @@ crawler.domainFunc["developer.mozilla.org"] = {
         var collection = [];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
-            var name = a.textContent;
+            var title = a.textContent;
             var url = a.href;
-            collection.push([name ,url]);
+            collection.push([title ,url]);
         }
         return collection;
     }
 };
-
+// jQuery API document
+crawler.domainFunc["api.jquery.com"] = {
+    indexTarget : [
+        "http://api.jquery.com/"
+    ],
+    indexer : function (doc) {
+        var anchors = $X('id("method-list")//a[@rel="bookmark"]', doc)
+        var collection = [];
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var a = anchors[i];
+            var title = a.textContent;
+            var url = a.href;
+            collection.push([title ,url]);
+        }
+        return collection;
+    }
+};
 function req(target, callback, next) {
     // util.message(L("通信開始"));
     var xhr = new XMLHttpRequest();
@@ -161,8 +219,13 @@ function req(target, callback, next) {
     xhr.overrideMimeType("text/html; charset=" + (target.charset || "utf-8"));
     xhr.send(null);
 }
-function openPrompt() {
-    var indexPages = crawler.getIndex();
+/**
+ * プロンプトを開き、リファレンスの検索を開始する
+ * @param domains ドメインの配列を指定する事ができる
+ */
+function openPrompt(domains) {
+    // 指定したDomainだけのIndexを取り出す || 無指定ならALL
+    var indexPages = crawler.getIndex(domains || null);
     if (_.isEmpty(indexPages)) {
         display.showPopup(saveKey, M({
             ja:"Indexがないので構築します…しばしお待ち",
@@ -225,7 +288,9 @@ ext.add(saveKey + "-reIndex",
         M({ja: saveKey + "のインデックスを作り直す",
             en: "reindex of" + saveKey}));
 ext.add(saveKey + "-open-prompt",
-        openPrompt,
+        function(aEvent, aArg) {
+            openPrompt(aArg || null);
+        },
         M({ja: saveKey + "で検索を開始する",
             en: "open prompt of" + saveKey}));
 
