@@ -12,8 +12,7 @@ var PLUGIN_INFO =
                 <ext>JsReferrence-open-prompt</ext>
                 <ext>JsReferrence-reIndex</ext>
             </provides>
-            <detail><![CDATA[]]></detail>
-            <detail lang="ja"><![CDATA[
+            <detail><![CDATA[
             === 使い方 ===
 このプラグインをインストールすることにより
 - JsReferrence-open-prompt
@@ -36,11 +35,14 @@ key.setGlobalKey(['C-b', 'r'], function (ev, arg) {
 key.setGlobalKey(['C-b', 'k'], function (ev, arg) {
     ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org"], ev);
 }, 'JsReferrenceのプロンプトを開く', true);
-// 二つのサイトを候補にする
+// 二つのサイトを候補にする - JavaScript
 key.setGlobalKey(['C-b', 'l'], function (ev, arg) {
     ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org", "www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"], ev);
 }, 'JsReferrenceのプロンプトを開く', true);
 ||<
+現在対応しているサイトと追加方法は以下の参考にしてください。
+https://github.com/azu/KeySnail-Plugins/tree/master/JSReference
+
 取得候補を足すにはSITEINFO部分次のような書式でパースしてIndexを作成するものを書きます。
 Pull Requestしてくれればデフォルトに取り入れるかもしれないです。
 >|javascript|
