@@ -92,9 +92,9 @@ crawler = (function() {
     var saveIndexFile = function() {
         persist.preserve(indexArray, saveKey);
         display.showPopup(saveKey, M({
-            ja:"Indexの構築が完了しました",
-            en:"Finish index"
-        }))
+                    ja:"Indexの構築が完了しました",
+                    en:"Finish index"
+                }))
     }
     var startIndex = function(domains) {
         domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
@@ -103,9 +103,9 @@ crawler = (function() {
             return;
         }
         display.showPopup(saveKey, M({
-            ja: domains.length + "個のIndexを構築します",
-            en:"Start building " + domains.length + " index."
-        }));
+                    ja: domains.length + "個のIndexを構築します",
+                    en:"Start building " + domains.length + " index."
+                }));
         reIndex(domains);
     }
     var reIndex = function(domains) {
@@ -165,9 +165,7 @@ crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
     ],
     indexer : function (doc) {
         var anchors = $X("//dt/a", doc);
-        // http://d.hatena.ne.jp/brazil/20080416/1208325257
-        var IOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-        var uri = IOService.newURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html", null, null).QueryInterface(Ci.nsIURL);
+        var uri = resolveURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html");
         var collection = [];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
@@ -178,6 +176,7 @@ crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
         return collection;
     }
 };
+
 // MDC
 crawler.domainFunc["developer.mozilla.org"] = {
     indexTarget : [
@@ -212,6 +211,24 @@ crawler.domainFunc["api.jquery.com"] = {
         return collection;
     }
 };
+// Annotated ECMAScript 5.1 
+crawler.domainFunc["es5.github.com"] = {
+    indexTarget : [
+        "http://es5.github.com/"
+    ],
+    indexer : function (doc) {
+        var anchors = doc.querySelectorAll('#toc-full a');
+        var uri = resolveURI("http://es5.github.com/");
+        var collection = [];
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var a = anchors[i];
+            var title = a.textContent;
+            var url = uri.resolve(a.getAttribute("href"));
+            collection.push([title ,url]);
+        }
+        return collection;
+    }
+};
 function req(target, callback, next) {
     // util.message(L("通信開始"));
     var xhr = new XMLHttpRequest();
@@ -232,9 +249,9 @@ function openPrompt(domains) {
     var indexPages = crawler.getIndex(domains || null);
     if (_.isEmpty(indexPages)) {
         display.showPopup(saveKey, M({
-            ja:"Indexがないので構築します…しばしお待ち",
-            en:"No Index,start building index."
-        }));
+                    ja:"Indexがないので構築します…しばしお待ち",
+                    en:"No Index,start building index."
+                }));
         crawler.startIndex();
         return;
     }
@@ -243,43 +260,43 @@ function openPrompt(domains) {
         collection = collection.concat(indexPages[i]);
     }
     prompt.selector({
-        message    : "pattern:",
-        collection : collection,
-        flags      : [0 , 0],
-        style      : [null, style.prompt.description],
-        header     : ["Title", "URL"],
-        width      : [25, 45],
-        actions    : [
-            [function (aIndex) {
-                if (aIndex >= 0) {
-                    openUILinkIn(getURL(aIndex), "current");
-                }
-            },M({
-                ja: '現在タブで開く',
-                en: "Open current tab"
-            }),"open-current-tab"],
-            [function (aIndex) {
-                if (aIndex >= 0) {
-                    openUILinkIn(getURL(aIndex), "tab");
-                }
-            }, "Open Link in new tab (foreground)"],
-            [function (aIndex) {
-                if (aIndex >= 0) {
-                    openUILinkIn(getURL(aIndex), "tabshifted");
-                }
-            }, "Open Link in new tab (background)"],
-            [function (aIndex) {
-                if (aIndex >= 0) {
-                    openUILinkIn(getURL(aIndex), "window");
-                }
-            }, "Open Link in new window"],
-            [function (aIndex) {
-                if (aIndex >= 0) {
-                    openUILinkIn(getURL(aIndex), "current");
-                }
-            }, "Open Link in current tab"],
-        ]
-    });
+                message    : "pattern:",
+                collection : collection,
+                flags      : [0 , 0],
+                style      : [null, style.prompt.description],
+                header     : ["Title", "URL"],
+                width      : [25, 45],
+                actions    : [
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "current");
+                        }
+                    },M({
+                            ja: '現在タブで開く',
+                                en: "Open current tab"
+                            }),"open-current-tab"],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "tab");
+                        }
+                    }, "Open Link in new tab (foreground)"],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "tabshifted");
+                        }
+                    }, "Open Link in new tab (background)"],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "window");
+                        }
+                    }, "Open Link in new window"],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "current");
+                        }
+                    }, "Open Link in current tab"],
+                ]
+            });
     function getURL(index) {
         return collection[index][1];
     }
@@ -290,13 +307,13 @@ ext.add(saveKey + "-reIndex",
             crawler.startIndex(aArg || null);
         },
         M({ja: saveKey + "のインデックスを作り直す",
-            en: "reindex of" + saveKey}));
+                    en: "reindex of" + saveKey}));
 ext.add(saveKey + "-open-prompt",
         function(aEvent, aArg) {
             openPrompt(aArg || null);
         },
         M({ja: saveKey + "で検索を開始する",
-            en: "open prompt of" + saveKey}));
+                    en: "open prompt of" + saveKey}));
 
 // $X on XHTML
 // @target Freifox3, Chrome3, Safari4, Opera10
@@ -318,9 +335,12 @@ function $X(exp, context) {
 
     var result = _document.evaluate(exp, context, resolver, XPathResult.ANY_TYPE, null);
     switch (result.resultType) {
-        case XPathResult.STRING_TYPE : return result.stringValue;
-        case XPathResult.NUMBER_TYPE : return result.numberValue;
-        case XPathResult.BOOLEAN_TYPE: return result.booleanValue;
+        case XPathResult.STRING_TYPE :
+            return result.stringValue;
+        case XPathResult.NUMBER_TYPE :
+            return result.numberValue;
+        case XPathResult.BOOLEAN_TYPE:
+            return result.booleanValue;
         case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
             // not ensure the order.
             var ret = [], i = null;
@@ -339,7 +359,7 @@ function createHTMLDocument_XSLT(source) {
                     '</xsl:template>' +
                     '</xsl:stylesheet>',
             'application/xml'
-            );
+    );
     processor.importStylesheet(sheet);
     var doc = processor.transformToDocument(sheet);
     var range = doc.createRange();
@@ -347,4 +367,10 @@ function createHTMLDocument_XSLT(source) {
     range.deleteContents();
     doc.documentElement.appendChild(range.createContextualFragment(source));
     return doc;
+}
+// nsURIを使って相対URLを絶対URLにするインターフェースを作る
+// http://d.hatena.ne.jp/brazil/20080416/1208325257
+function resolveURI(URI) {
+    var IOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+    return IOService.newURI(URI, null, null).QueryInterface(Ci.nsIURL);
 }
