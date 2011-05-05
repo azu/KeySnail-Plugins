@@ -4,10 +4,12 @@
 - [developer.mozilla.org]
 - [www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/]
 - [api.jquery.com]
+- [es5.github.com]
 
 [developer.mozilla.org]: http://developer.mozilla.org "Mozilla Developer Network"
 [www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/]: http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/ "Under Translation of ECMA-262 3rd Edition"
 [api.jquery.com]: http://api.jquery.com "jQuery API Document"
+[es5.github.com]: http://es5.github.com/ "Annotated ECMAScript 5.1"
 
 対応サイトの増やし方はjs-referrence.ks.js内のSITEINFO付近に以下のような感じで増やしていきます。
 
@@ -28,9 +30,12 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
 
 
 ##更新履歴
- 
+
+####ver 0.0.3
+es5.github.com に対応
+
 ####ver 0.0.2
-api.jquery.com 対応
+api.jquery.com に対応
 
 JsReferrence-open-promptコマンドで任意のサイトのみを対象に検索できるようになった。
 

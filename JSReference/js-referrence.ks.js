@@ -4,7 +4,7 @@ var PLUGIN_INFO =
             <description>JavaScriptリファレンスを引く</description>
             <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
             <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
-            <version>0.0.2</version>
+            <version>0.0.3</version>
             <minVersion>1.8.5</minVersion>
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
@@ -177,7 +177,7 @@ crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
     }
 };
 
-// MDC
+// Mozilla Developer Network
 crawler.domainFunc["developer.mozilla.org"] = {
     indexTarget : [
         'https://developer.mozilla.org/Special:Sitemap'//?language=ja
@@ -272,7 +272,7 @@ function openPrompt(domains) {
                             openUILinkIn(getURL(aIndex), "current");
                         }
                     },M({
-                            ja: '現在タブで開く',
+                                ja: '現在タブで開く',
                                 en: "Open current tab"
                             }),"open-current-tab"],
                     [function (aIndex) {
