@@ -115,21 +115,21 @@ crawler = (function() {
     var saveIndexFile = function() {
         persist.preserve(indexArray, saveKey);
         display.showPopup(saveKey, M({
-            ja:"Indexの構築が完了しました",
+            ja:"インデックスの構築が完了しました",
             en:"Finish index"
         }));
     }
     var startIndex = function(domains) {
         domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
         if (!domains) {
-            util.message(L("Index構築のドメインが指定されていない"));
+            util.message(L("インデックス構築のドメインが指定されていない"));
             return;
         } else if (!_.isArray(domains)) {
             util.message(L("ドメインは配列でして下さい"));
             return;
         }
         display.showPopup(saveKey, M({
-            ja: domains.length + "個のIndexを構築します",
+            ja: domains.length + "個のインデックスを構築します",
             en:"Start building " + domains.length + " index."
         }));
         reIndex(domains);
@@ -138,10 +138,10 @@ crawler = (function() {
         var cd = crawler.domainFunc;
         domainIndexer(domains.pop());
         function domainIndexer(domain) {
-            display.showPopup(saveKey, M({
+            display.echoStatusBar(M({
                 ja:domain + "のIndexを構築開始します",
                 en:"Start building " + domain + "'s index."
-            }));
+            }), 3000);
             var domainIndex = cd[domain].indexTarget;// URLの配列
             var target = getDomainObj(domain);
             // ドメイン内のindexTargetが無くなるまで再帰的に取得する
@@ -172,9 +172,14 @@ crawler = (function() {
 
             // indexerを呼び出して取得結果をpushする
             function saveContentIndex(domain, doc) {
-                var collection = cd[domain].indexer(doc);
-                if (collection) {
-                    crawler.pushIndex(domain, collection);
+                try {
+                    var collection = cd[domain].indexer(doc);
+                    if (collection) {
+                        crawler.pushIndex(domain, collection);
+                    }
+                } catch(e) {
+                    util.message(L(e + "\n"
+                            + domain + "のindexerでエラー"));
                 }
             }
 
@@ -233,6 +238,13 @@ crawler.domainFunc["developer.mozilla.org"] = {
         return collection;
     }
 };
+// Mozilla Developer Network 日本語
+crawler.domainFunc["jp.developer.mozilla.org"] = {
+    indexTarget : [
+        'https://developer.mozilla.org/Special:Sitemap?language=ja'
+    ],
+    indexer : crawler.domainFunc["developer.mozilla.org"].indexer
+};
 // jQuery API document
 crawler.domainFunc["api.jquery.com"] = {
     indexTarget : [
@@ -260,8 +272,8 @@ crawler.domainFunc["es5.github.com"] = {
     ],
     indexer : function (doc) {
         var anchors = doc.querySelectorAll('#toc-full a');
-        var collection = [
-        ];
+        var collection = [];
+        var uri = resolveURI("http://es5.github.com/");
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var title = a.textContent;
@@ -351,7 +363,7 @@ function openPrompt(domains) {
     var indexPages = crawler.getIndex(domains || null);
     if (_.isEmpty(indexPages)) {
         display.showPopup(saveKey, M({
-            ja:"Indexがないので構築します…しばしお待ち",
+            ja:"インデックスがないので構築します…しばしお待ち",
             en:"No Index,start building index."
         }));
         crawler.startIndex();
