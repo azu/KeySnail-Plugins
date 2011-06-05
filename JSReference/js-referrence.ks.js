@@ -300,7 +300,7 @@ crawler.domainFunc["msdn.microsoft.com"] = {
         "http://msdn.microsoft.com/en-us/library/3xcfcb93(v=VS.94).aspx",
         "http://msdn.microsoft.com/en-us/library/7th8s2xk(v=VS.94).aspx",
         // Object
-        "http://msdn.microsoft.com/en-us/library/htbw4ywd%28v=VS.94%29.aspx",
+        "http://msdn.microsoft.com/en-us/library/htbw4ywd(v=VS.94).aspx",
         // http://msdn.microsoft.com/en-us/library/htbw4ywd%28v=VS.94%29.aspx 以下
         "http://msdn.microsoft.com/en-us/library/7sw4ddf8(v=VS.94).aspx",
         "http://msdn.microsoft.com/en-us/library/k4h76zbx(v=VS.94).aspx",
@@ -395,10 +395,7 @@ function openPrompt(domains) {
                     if (aIndex >= 0) {
                         openUILinkIn(getURL(aIndex), "current");
                     }
-                },M({
-                ja: '現在タブで開く',
-                en: "Open current tab"
-            }),"open-current-tab"
+                }, "Open Link in current tab"
             ],
             [
                 function (aIndex) {
