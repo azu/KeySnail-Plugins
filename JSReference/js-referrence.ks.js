@@ -28,8 +28,8 @@ key.setGlobalKey(['C-b', 'r'], function (ev, arg) {
     ext.exec("JsReferrence-reIndex", arg, ev);
 }, 'JsReferrenceののインデックスを作り直す', true);
 ||<
-またJsReferrence-open-promptには引数として、候補に表示するドメインの"配列"を指定できます。
-無指定の場合は全てのサイトから検索を行います。
+またこれらのコマンドは、引数として対象ドメインの"配列"を指定できます。
+無指定の場合は全てのサイトから検索やインデックスの再構築を行います。
 >|javascript|
 // developer.mozilla.org だけを候補にする例
 key.setGlobalKey(['C-b', 'k'], function (ev, arg) {
@@ -38,6 +38,10 @@ key.setGlobalKey(['C-b', 'k'], function (ev, arg) {
 // 二つのサイトを候補にする - JavaScript
 key.setGlobalKey(['C-b', 'l'], function (ev, arg) {
     ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org", "www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"], ev);
+}, 'JsReferrenceのプロンプトを開く', true);
+// インデックスの構築もドメイン指定できる
+key.setGlobalKey(['C-b', 'r'], function (ev, arg) {
+    ext.exec("JsReferrence-reIndex", ["msdn.microsoft.com"], ev);
 }, 'JsReferrenceのプロンプトを開く', true);
 ||<
 現在対応しているサイトと追加方法は以下の参考にしてください。
