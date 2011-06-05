@@ -5,12 +5,14 @@ JavaScriptなどのリファレンスのインデックスを構築し、高速�
 ##対応サイト
 
 - [developer.mozilla.org]
+- [jp.developer.mozilla.org]
 - [www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/]
 - [api.jquery.com]
 - [es5.github.com]
 - [msdn.microsoft.com]
 
 [developer.mozilla.org]: http://developer.mozilla.org "Mozilla Developer Network"
+[jp.developer.mozilla.org]: https://developer.mozilla.org/ja "Mozilla Developer Network日本語版"
 [www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/]: http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/ "Under Translation of ECMA-262 3rd Edition"
 [api.jquery.com]: http://api.jquery.com "jQuery API Document"
 [es5.github.com]: http://es5.github.com/ "Annotated ECMAScript 5.1"
@@ -35,6 +37,11 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
 
 
 ##更新履歴
+####ver 0.0.5
+インデックス処理が動かないバグを修正。
+
+[jp.developer.mozilla.org] 日本語版のMDNも追加した。
+重複した感じで表示されるので、英語か日本語どちらかに絞るか、jaなどを検索ワードに入れて絞り込んで使う感じで
 
 ####ver 0.0.4
 [msdn.microsoft.com] のJavaScript Language Referenceに対応
