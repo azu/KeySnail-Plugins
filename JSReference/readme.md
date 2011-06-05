@@ -36,6 +36,7 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
 ####ver 0.0.4
 [msdn.microsoft.com] のJavaScript Language Referenceに対応
 取りこぼしがあるかもしれない。
+
 インデックス構築時のメッセージを増やした。
 ####ver 0.0.3
 [es5.github.com] に対応
