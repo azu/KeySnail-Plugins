@@ -4,7 +4,7 @@ var PLUGIN_INFO =
             <description>JavaScriptリファレンスを引く</description>
             <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
             <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
-            <version>0.0.3</version>
+            <version>0.0.4</version>
             <minVersion>1.8.5</minVersion>
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
@@ -88,7 +88,7 @@ crawler = (function() {
             indexArray[domain] = [];
         }
         // 結合して[0,1]重複チェックする
-        indexArray[domain] = uniqAry(indexArray[domain].concat(collection) , 1);
+        indexArray[domain] = uniqAry(indexArray[domain].concat(collection), 1);
         return indexArray[domain];
     }
     var getIndex = function(domains) {
@@ -132,6 +132,10 @@ crawler = (function() {
         var cd = crawler.domainFunc;
         domainIndexer(domains.pop());
         function domainIndexer(domain) {
+            display.showPopup(saveKey, M({
+                ja:domain + "のIndexを構築開始します",
+                en:"Start building " + domain + "'s index."
+            }));
             var domainIndex = cd[domain].indexTarget;// URLの配列
             var target = getDomainObj(domain);
             // ドメイン内のindexTargetが無くなるまで再帰的に取得する
@@ -147,6 +151,7 @@ crawler = (function() {
                             if (domains.length > 0) {// 次のドメインへ
                                 var nextDomain = domains.pop();
                                 domainIndexer(nextDomain);
+
                             } else {// 取得対象がなくなったのでファイルに保存
                                 saveIndexFile();
                             }
