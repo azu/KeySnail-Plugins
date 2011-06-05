@@ -70,8 +70,26 @@ crawler = (function() {
     var domainFunc = {},// ドメイン毎のindexer
             indexArray = persist.restore(saveKey) || {};
 
+    function uniqAry(ary, prop) {
+        prop = prop || 0;
+        var checkAry = [];// 重複チェック用
+        return _.reduce(ary, function(memo, el, i) {
+            if (0 == i || checkAry.indexOf(el[prop]) === -1) {
+                // memoにまだ無い要素だったらpushする
+                memo[memo.length] = el;
+                checkAry.push(el[prop])
+            }
+            return memo;
+        }, []);// memoの初期値
+    }
+
     var pushIndex = function(domain, collection) {
-        indexArray[domain] = collection;
+        if (!indexArray[domain]) {
+            indexArray[domain] = [];
+        }
+        // 結合して[0,1]重複チェックする
+        indexArray[domain] = uniqAry(indexArray[domain].concat(collection) , 1);
+        return indexArray[domain];
     }
     var getIndex = function(domains) {
         if (!domains) {// 指定なしならreturn ALL
@@ -87,25 +105,27 @@ crawler = (function() {
         return selectedIndex;
     }
     var clearIndex = function() {
-
     }
     var saveIndexFile = function() {
         persist.preserve(indexArray, saveKey);
         display.showPopup(saveKey, M({
-                    ja:"Indexの構築が完了しました",
-                    en:"Finish index"
-                }))
+            ja:"Indexの構築が完了しました",
+            en:"Finish index"
+        }));
     }
     var startIndex = function(domains) {
         domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
         if (!domains) {
             util.message(L("Index構築のドメインが指定されていない"));
             return;
+        } else if (!_.isArray(domains)) {
+            util.message(L("ドメインは配列でして下さい"));
+            return;
         }
         display.showPopup(saveKey, M({
-                    ja: domains.length + "個のIndexを構築します",
-                    en:"Start building " + domains.length + " index."
-                }));
+            ja: domains.length + "個のIndexを構築します",
+            en:"Start building " + domains.length + " index."
+        }));
         reIndex(domains);
     }
     var reIndex = function(domains) {
@@ -116,22 +136,22 @@ crawler = (function() {
             var target = getDomainObj(domain);
             // ドメイン内のindexTargetが無くなるまで再帰的に取得する
             req(target, function(res) {
-                saveContentIndex(domain, res);
-            }, function next() {
-                if (domainIndex.length > 0) { // 次のtarget pageへ
-                    var target = getDomainObj(domain);
-                    req(target, function(res) {
                         saveContentIndex(domain, res);
-                    }, next);
-                } else {
-                    if (domains.length > 0) {// 次のドメインへ
-                        var nextDomain = domains.pop();
-                        domainIndexer(nextDomain);
-                    } else {// 取得対象がなくなったのでファイルに保存
-                        saveIndexFile();
-                    }
-                }
-            });
+                    }, function next() {
+                        if (domainIndex.length > 0) { // 次のtarget pageへ
+                            var target = getDomainObj(domain);
+                            req(target, function(res) {
+                                saveContentIndex(domain, res);
+                            }, next);
+                        } else {
+                            if (domains.length > 0) {// 次のドメインへ
+                                var nextDomain = domains.pop();
+                                domainIndexer(nextDomain);
+                            } else {// 取得対象がなくなったのでファイルに保存
+                                saveIndexFile();
+                            }
+                        }
+                    });
             function getDomainObj(domain) {
                 return {
                     "url" : domainIndex.pop(),
@@ -142,7 +162,9 @@ crawler = (function() {
             // indexerを呼び出して取得結果をpushする
             function saveContentIndex(domain, doc) {
                 var collection = cd[domain].indexer(doc);
-                crawler.pushIndex(domain, collection);
+                if (collection) {
+                    crawler.pushIndex(domain, collection);
+                }
             }
 
         }
@@ -166,12 +188,15 @@ crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
     indexer : function (doc) {
         var anchors = $X("//dt/a", doc);
         var uri = resolveURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html");
-        var collection = [];
+        var collection = [
+        ];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var title = a.textContent.replace(/^[\d\s.]*/, "");
             var url = uri.resolve(a.getAttribute("href"));
-            collection.push([title ,url]);
+            collection.push([
+                title ,url
+            ]);
         }
         return collection;
     }
@@ -184,12 +209,15 @@ crawler.domainFunc["developer.mozilla.org"] = {
     ],
     indexer : function (doc) {
         var anchors = doc.querySelectorAll('a[pageid][rel="internal"]');
-        var collection = [];
+        var collection = [
+        ];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var title = a.textContent;
             var url = a.href;
-            collection.push([title ,url]);
+            collection.push([
+                title ,url
+            ]);
         }
         return collection;
     }
@@ -201,12 +229,15 @@ crawler.domainFunc["api.jquery.com"] = {
     ],
     indexer : function (doc) {
         var anchors = $X('id("method-list")//a[@rel="bookmark"]', doc)
-        var collection = [];
+        var collection = [
+        ];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var title = a.textContent;
             var url = a.href;
-            collection.push([title ,url]);
+            collection.push([
+                title ,url
+            ]);
         }
         return collection;
     }
@@ -218,17 +249,77 @@ crawler.domainFunc["es5.github.com"] = {
     ],
     indexer : function (doc) {
         var anchors = doc.querySelectorAll('#toc-full a');
-        var uri = resolveURI("http://es5.github.com/");
-        var collection = [];
+        var collection = [
+        ];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var title = a.textContent;
             var url = uri.resolve(a.getAttribute("href"));
-            collection.push([title ,url]);
+            collection.push([
+                title ,url
+            ]);
         }
         return collection;
     }
 };
+
+// msdn.microsoft.com JavaScript Language Reference
+crawler.domainFunc["msdn.microsoft.com"] = {
+    // Util : https://gist.github.com/1008796
+    indexTarget : [
+        // http://msdn.microsoft.com/en-us/library/yek4tbz0%28v=VS.94%29.aspx
+        "http://msdn.microsoft.com/en-us/library/s4esdbwz(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/ff818462(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/xyad316h(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/6fw3zxcx(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/c6hac83s(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/ce57k8d5(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/3xcfcb93(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/7th8s2xk(v=VS.94).aspx",
+        // Object
+        "http://msdn.microsoft.com/en-us/library/htbw4ywd%28v=VS.94%29.aspx",
+        // http://msdn.microsoft.com/en-us/library/htbw4ywd%28v=VS.94%29.aspx 以下
+        "http://msdn.microsoft.com/en-us/library/7sw4ddf8(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/k4h76zbx(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/87dw3w1k(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/t7bkhaz6(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/cd9w2te4(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/bs12a9wf(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/6ch9zb09(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/dww52sbt(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/x844tc74(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/52f50e9t(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/cc836458(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/b272f386(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/dwab3ed2(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/kb6te8d3(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/9dthzd08(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/h6e2eb7w(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/ecczf11c(v=VS.94).aspx",
+        "http://msdn.microsoft.com/en-us/library/y39d47w8(v=VS.94).aspx",
+    ],
+    indexer : function (doc) {
+        var anchors = doc.querySelectorAll('#Navigation .children > div > a');
+        var subject = doc.querySelector('#Navigation div.toclevel1.current > a').title;
+        subject = subject.replace(" (JavaScript)", "");
+        if (_.isEmpty(anchors) || !subject) {
+            return;
+        }
+        var collection = [
+        ];
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var a = anchors[i];
+            var title = a.title.replace(" (JavaScript)", "");
+            var url = a.getAttribute("href");
+            collection.push([
+                subject + " / " + title ,url
+            ]);
+        }
+        return collection;
+    }
+};
+
+
 function req(target, callback, next) {
     // util.message(L("通信開始"));
     var xhr = new XMLHttpRequest();
@@ -249,54 +340,73 @@ function openPrompt(domains) {
     var indexPages = crawler.getIndex(domains || null);
     if (_.isEmpty(indexPages)) {
         display.showPopup(saveKey, M({
-                    ja:"Indexがないので構築します…しばしお待ち",
-                    en:"No Index,start building index."
-                }));
+            ja:"Indexがないので構築します…しばしお待ち",
+            en:"No Index,start building index."
+        }));
         crawler.startIndex();
         return;
     }
-    var collection = [];
+    var collection = [
+    ];
     for (var i in indexPages) {
         collection = collection.concat(indexPages[i]);
     }
     prompt.selector({
-                message    : "pattern:",
-                collection : collection,
-                flags      : [0 , 0],
-                style      : [null, style.prompt.description],
-                header     : ["Title", "URL"],
-                width      : [25, 45],
-                actions    : [
-                    [function (aIndex) {
-                        if (aIndex >= 0) {
-                            openUILinkIn(getURL(aIndex), "current");
-                        }
-                    },M({
-                                ja: '現在タブで開く',
-                                en: "Open current tab"
-                            }),"open-current-tab"],
-                    [function (aIndex) {
-                        if (aIndex >= 0) {
-                            openUILinkIn(getURL(aIndex), "tab");
-                        }
-                    }, "Open Link in new tab (foreground)"],
-                    [function (aIndex) {
-                        if (aIndex >= 0) {
-                            openUILinkIn(getURL(aIndex), "tabshifted");
-                        }
-                    }, "Open Link in new tab (background)"],
-                    [function (aIndex) {
-                        if (aIndex >= 0) {
-                            openUILinkIn(getURL(aIndex), "window");
-                        }
-                    }, "Open Link in new window"],
-                    [function (aIndex) {
-                        if (aIndex >= 0) {
-                            openUILinkIn(getURL(aIndex), "current");
-                        }
-                    }, "Open Link in current tab"],
-                ]
-            });
+        message    : "pattern:",
+        collection : collection,
+        flags      : [
+            0 , 0
+        ],
+        style      : [
+            null, style.prompt.description
+        ],
+        header     : [
+            "Title", "URL"
+        ],
+        width      : [
+            25, 45
+        ],
+        actions    : [
+            [
+                function (aIndex) {
+                    if (aIndex >= 0) {
+                        openUILinkIn(getURL(aIndex), "current");
+                    }
+                },M({
+                ja: '現在タブで開く',
+                en: "Open current tab"
+            }),"open-current-tab"
+            ],
+            [
+                function (aIndex) {
+                    if (aIndex >= 0) {
+                        openUILinkIn(getURL(aIndex), "tab");
+                    }
+                }, "Open Link in new tab (foreground)"
+            ],
+            [
+                function (aIndex) {
+                    if (aIndex >= 0) {
+                        openUILinkIn(getURL(aIndex), "tabshifted");
+                    }
+                }, "Open Link in new tab (background)"
+            ],
+            [
+                function (aIndex) {
+                    if (aIndex >= 0) {
+                        openUILinkIn(getURL(aIndex), "window");
+                    }
+                }, "Open Link in new window"
+            ],
+            [
+                function (aIndex) {
+                    if (aIndex >= 0) {
+                        openUILinkIn(getURL(aIndex), "current");
+                    }
+                }, "Open Link in current tab"
+            ],
+        ]
+    });
     function getURL(index) {
         return collection[index][1];
     }
@@ -307,13 +417,13 @@ ext.add(saveKey + "-reIndex",
             crawler.startIndex(aArg || null);
         },
         M({ja: saveKey + "のインデックスを作り直す",
-                    en: "reindex of" + saveKey}));
+            en: "reindex of" + saveKey}));
 ext.add(saveKey + "-open-prompt",
         function(aEvent, aArg) {
             openPrompt(aArg || null);
         },
         M({ja: saveKey + "で検索を開始する",
-                    en: "open prompt of" + saveKey}));
+            en: "open prompt of" + saveKey}));
 
 // $X on XHTML
 // @target Freifox3, Chrome3, Safari4, Opera10
@@ -343,8 +453,11 @@ function $X(exp, context) {
             return result.booleanValue;
         case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
             // not ensure the order.
-            var ret = [], i = null;
-            while (i = result.iterateNext()) ret.push(i);
+            var ret = [
+            ], i = null;
+            while (i = result.iterateNext()) {
+                ret.push(i);
+            }
             return ret;
     }
 }
