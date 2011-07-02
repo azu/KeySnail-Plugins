@@ -328,8 +328,7 @@ crawler.domainFunc["msdn.microsoft.com"] = {
         if (_.isEmpty(anchors) || !subject) {
             return;
         }
-        var collection = [
-        ];
+        var collection = [];
         for (var i = 0, len = anchors.length; i < len; i++) {
             var a = anchors[i];
             var title = a.title.replace(" (JavaScript)", "");
@@ -341,7 +340,26 @@ crawler.domainFunc["msdn.microsoft.com"] = {
         return collection;
     }
 };
-
+//  sitepoint CSS reference
+crawler.domainFunc["reference.sitepoint.com/css"] = {
+    indexTarget : [
+        "http://reference.sitepoint.com/css/demos"
+    ],
+    indexer : function (doc) {
+        var anchors = doc.querySelectorAll("#contentpanelcontent a");
+        var collection = [];
+        var uri = resolveURI("http://reference.sitepoint.com/");
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var a = anchors[i];
+            var title = a.textContent;
+            var url = uri.resolve(a.getAttribute("href"));
+            collection.push([
+                title ,url
+            ]);
+        }
+        return collection;
+    }
+};
 
 function req(target, callback, next) {
     // util.message(L("通信開始"));
