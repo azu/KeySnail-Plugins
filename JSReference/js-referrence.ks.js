@@ -361,6 +361,28 @@ crawler.domainFunc["reference.sitepoint.com/css"] = {
     }
 };
 
+// Apple Document
+crawler.domainFunc["developer.apple.com/library/ios"] = {
+    indexTarget : [
+        "http://developer.apple.com/library/ios/sitemap.php"
+    ],
+    indexer : function (doc) {
+        var anchors = doc.getElementsByTagName("a");
+        var collection = [];
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var a = anchors[i];
+            var link = a.getAttribute("href");
+            var linkSplit = link.split("/");
+            var title = linkSplit[linkSplit.length - 2].replace("_", " ");
+            var url = a.getAttribute("href");
+            collection.push([
+                title ,url
+            ]);
+        }
+        return collection;
+    }
+};
+
 function req(target, callback, next) {
     // util.message(L("通信開始"));
     var xhr = new XMLHttpRequest();
