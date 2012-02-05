@@ -1,0 +1,1 @@
+/Users/azu/Dropbox/Firefox/keysnail/plugins/search-fast.ks.js
