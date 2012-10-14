@@ -10,13 +10,19 @@ JavaScriptなどのリファレンスのインデックスを構築し、高速�
 - [api.jquery.com]
 - [es5.github.com]
 - [msdn.microsoft.com]
+- [developer.apple.com/library/ios]
+- [profo.jp/wiki]
+- [js.studio-kingdom.com/jquery]
 
 [developer.mozilla.org]: http://developer.mozilla.org "Mozilla Developer Network"
 [jp.developer.mozilla.org]: https://developer.mozilla.org/ja "Mozilla Developer Network日本語版"
 [www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/]: http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/ "Under Translation of ECMA-262 3rd Edition"
 [api.jquery.com]: http://api.jquery.com "jQuery API Document"
+[js.studio-kingdom.com/jquery]: http://js.studio-kingdom.com/jquery "js STUDIO | jQuery 日本語リファレンス"
 [es5.github.com]: http://es5.github.com/ "Annotated ECMAScript 5.1"
 [msdn.microsoft.com]: http://msdn.microsoft.com/en-us/library/yek4tbz0%28v=VS.94%29.aspx "MSDN JavaScript Language Reference"
+[developer.apple.com/library/ios]: http://developer.apple.com/library/ios/sitemap.php "Apple dcoument"
+[profo.jp/wiki]: http://profo.jp/wiki/index.php?cmd=list "iOS 日本語リファレンス"
 
 対応サイトの増やし方はjs-referrence.ks.js内のSITEINFO付近に以下のような感じで増やしていきます。
 
@@ -37,6 +43,16 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
 
 
 ##更新履歴
+
+####ver 0.0.6
+
+対応サイトの追加
+
+- [js.studio-kingdom.com/jquery]
+- [developer.apple.com/library/ios]
+- [profo.jp/wiki]
+
+
 ####ver 0.0.5
 インデックス処理が動かないバグを修正。
 
