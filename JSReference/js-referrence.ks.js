@@ -361,8 +361,9 @@ crawler.domainFunc["reference.sitepoint.com/css"] = {
     }
 };
 
-// Apple Document
+// Apple iOS Document
 crawler.domainFunc["developer.apple.com/library/ios"] = {
+    category:"iOS",
     indexTarget : [
         "http://developer.apple.com/library/ios/sitemap.php"
     ],
@@ -374,6 +375,27 @@ crawler.domainFunc["developer.apple.com/library/ios"] = {
             var link = a.getAttribute("href");
             var linkSplit = link.split("/");
             var title = linkSplit[linkSplit.length - 2].replace("_", " ");
+            var url = a.getAttribute("href");
+            collection.push([
+                title ,url
+            ]);
+        }
+        return collection;
+    }
+};
+// 福井高専IT研究会Wiki iOSフレームワーク
+// http://profo.jp/wiki/index.php?%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9
+crawler.domainFunc["profo.jp/wiki"] = {
+    category:"iOS",
+    indexTarget : [
+        "http://profo.jp/wiki/index.php?cmd=list"
+    ],
+    indexer : function (doc) {
+        var anchors = doc.querySelectorAll("#body a:not([id])");
+        var collection = [];
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var a = anchors[i];
+            var title = a.textContent;
             var url = a.getAttribute("href");
             collection.push([
                 title ,url
