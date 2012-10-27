@@ -157,7 +157,7 @@ crawler = (function(){
                         req(target, function(res){
                             saveContentIndex(domain, res);
                         }, next);
-                    }.bind(this), 200);
+                    }.bind(this), 500);
                 }else{
                     if (domains.length > 0){// 次のドメインへ
                         var nextDomain = domains.pop();
