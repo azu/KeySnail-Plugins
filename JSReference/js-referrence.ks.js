@@ -4,7 +4,7 @@ var PLUGIN_INFO =
             <description>JavaScriptリファレンスを引く</description>
             <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
             <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
-            <version>0.0.6</version>
+            <version>0.0.7</version>
             <minVersion>1.8.5</minVersion>
             <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
             <license>The MIT License</license>
@@ -70,7 +70,7 @@ https://github.com/azu/KeySnail-Plugins/tree/master/JSReference
 ]]></detail>
         </KeySnailPlugin>;
 
-var saveKey = PLUGIN_INFO.name.toString().replace(/\s/g, "_");
+var saveKey = "JsReferrence";
 var crawler = crawler || {};
 crawler = (function(){
     var domainFunc = {}, // ドメイン毎のindexer
@@ -111,6 +111,7 @@ crawler = (function(){
         return selectedIndex;
     }
     var clearIndex = function(){
+        indexArray = {};
     }
     var saveIndexFile = function(){
         persist.preserve(indexArray, saveKey);
@@ -120,6 +121,7 @@ crawler = (function(){
         }));
     }
     var startIndex = function(domains){
+        clearIndex();
         domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
         if (!domains){
             util.message(L("インデックス構築のドメインが指定されていない"));
@@ -138,6 +140,7 @@ crawler = (function(){
         var cd = crawler.domainFunc;
         domainIndexer(domains.pop());
         function domainIndexer(domain){
+            var indexCount = 0
             display.echoStatusBar(M({
                 ja : domain + "のIndexを構築開始します",
                 en : "Start building " + domain + "'s index."
@@ -150,14 +153,15 @@ crawler = (function(){
             }, function next(){
                 if (domainIndex.length > 0){ // 次のtarget pageへ
                     var target = getDomainObj(domain);
-                    req(target, function(res){
-                        saveContentIndex(domain, res);
-                    }, next);
+                    setTimeout(function(){
+                        req(target, function(res){
+                            saveContentIndex(domain, res);
+                        }, next);
+                    }.bind(this), 200);
                 }else{
                     if (domains.length > 0){// 次のドメインへ
                         var nextDomain = domains.pop();
                         domainIndexer(nextDomain);
-
                     }else{// 取得対象がなくなったのでファイルに保存
                         saveIndexFile();
                     }
@@ -173,9 +177,13 @@ crawler = (function(){
             // indexerを呼び出して取得結果をpushする
             function saveContentIndex(domain, doc){
                 try{
-                    var collection = cd[domain].indexer(doc);
+                    // this は cd[domain] にする
+                    var collection = cd[domain].indexer.call(cd[domain], doc);
                     if (collection){
                         crawler.pushIndex(domain, collection);
+                        display.echoStatusBar(M({
+                            ja : domain + "のIndexを構築中... " + (indexCount++)
+                        }), 3000);
                     }
                 }catch (e){
                     util.message(L(e + "\n"
@@ -195,235 +203,247 @@ crawler = (function(){
 /*
  * SITE INFO
  */
-// Under Translation of ECMA-262 3rd Edition
-crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
-    charset : "Shift-jis",
-    indexTarget : [
-        "http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html"
-    ],
-    indexer : function(doc){
-        var anchors = $X("//dt/a", doc);
-        var uri = resolveURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html");
-        var collection = [
-        ];
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent.replace(/^[\d\s.]*/, "");
-            var url = uri.resolve(a.getAttribute("href"));
-            collection.push([
-                title , url
-            ]);
-        }
-        return collection;
-    }
-};
+(function(){
 
-// Mozilla Developer Network
-crawler.domainFunc["developer.mozilla.org"] = {
-    indexTarget : [
-        'https://developer.mozilla.org/Special:Sitemap'//?language=ja
-    ],
-    indexer : function(doc){
-        var anchors = doc.querySelectorAll('a[pageid][rel="internal"]');
-        var collection = [
-        ];
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent;
-            var url = a.href;
-            collection.push([
-                title , url
-            ]);
+    // Under Translation of ECMA-262 3rd Edition
+    crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
+        charset : "Shift-jis",
+        indexTarget : [
+            "http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html"
+        ],
+        indexer : function(doc){
+            var anchors = $X("//dt/a", doc);
+            var uri = resolveURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html");
+            var collection = [
+            ];
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent.replace(/^[\d\s.]*/, "");
+                var url = uri.resolve(a.getAttribute("href"));
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
         }
-        return collection;
-    }
-};
-// Mozilla Developer Network 日本語
-crawler.domainFunc["jp.developer.mozilla.org"] = {
-    indexTarget : [
-        'https://developer.mozilla.org/Special:Sitemap?language=ja'
-    ],
-    indexer : crawler.domainFunc["developer.mozilla.org"].indexer
-};
-// jQuery API document
-crawler.domainFunc["api.jquery.com"] = {
-    indexTarget : [
-        "http://api.jquery.com/"
-    ],
-    indexer : function(doc){
-        var anchors = $X('id("method-list")//a[@rel="bookmark"]', doc)
-        var collection = [
-        ];
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent;
-            var url = a.href;
-            collection.push([
-                title , url
-            ]);
-        }
-        return collection;
-    }
-};
-// jQuery unofficial API document(ja)
-crawler.domainFunc["js.studio-kingdom.com/jquery"] = {
-    indexTarget : [
-        "http://js.studio-kingdom.com/jquery/"
-    ],
-    indexer : function(doc){
-        var anchors = doc.querySelectorAll(".nav-list li > a");
-        var collection = [];
-        var uri = resolveURI("http://js.studio-kingdom.com/");
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent;
-            var url = uri.resolve(a.getAttribute("href"));
-            collection.push([
-                title , url
-            ]);
-        }
-        return collection;
-    }
-};
-// Annotated ECMAScript 5.1 
-crawler.domainFunc["es5.github.com"] = {
-    indexTarget : [
-        "http://es5.github.com/"
-    ],
-    indexer : function(doc){
-        var anchors = doc.querySelectorAll('#toc-full a');
-        var collection = [];
-        var uri = resolveURI("http://es5.github.com/");
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent;
-            var url = uri.resolve(a.getAttribute("href"));
-            collection.push([
-                title , url
-            ]);
-        }
-        return collection;
-    }
-};
+    };
 
-// msdn.microsoft.com JavaScript Language Reference
-crawler.domainFunc["msdn.microsoft.com"] = {
-    // Util : https://gist.github.com/1008796
-    indexTarget : [
-        // http://msdn.microsoft.com/en-us/library/yek4tbz0%28v=VS.94%29.aspx
-        "http://msdn.microsoft.com/en-us/library/s4esdbwz(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/ff818462(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/xyad316h(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/6fw3zxcx(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/c6hac83s(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/ce57k8d5(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/3xcfcb93(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/7th8s2xk(v=VS.94).aspx",
-        // Object
-        "http://msdn.microsoft.com/en-us/library/htbw4ywd(v=VS.94).aspx",
-        // http://msdn.microsoft.com/en-us/library/htbw4ywd%28v=VS.94%29.aspx 以下
-        "http://msdn.microsoft.com/en-us/library/7sw4ddf8(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/k4h76zbx(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/87dw3w1k(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/t7bkhaz6(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/cd9w2te4(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/bs12a9wf(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/6ch9zb09(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/dww52sbt(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/x844tc74(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/52f50e9t(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/cc836458(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/b272f386(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/dwab3ed2(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/kb6te8d3(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/9dthzd08(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/h6e2eb7w(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/ecczf11c(v=VS.94).aspx",
-        "http://msdn.microsoft.com/en-us/library/y39d47w8(v=VS.94).aspx",
-    ],
-    indexer : function(doc){
-        var anchors = doc.querySelectorAll('#Navigation .children > div > a');
-        var subject = doc.querySelector('#Navigation div.toclevel1.current > a').title;
-        subject = subject.replace(" (JavaScript)", "");
-        if (_.isEmpty(anchors) || !subject){
-            return;
+    // Mozilla Developer Network
+    crawler.domainFunc["developer.mozilla.org"] = {
+        indexTarget : [
+            'https://developer.mozilla.org/en-US/docs/all'
+        ],
+        indexer : (function(){
+            var uri = resolveURI("https://developer.mozilla.org/");
+            return function(doc){
+                // next linkを辿ってクロールする
+                var nextLink = doc.querySelector('#document-list .next > a');
+                if (nextLink){
+                    this.indexTarget.push(nextLink.href);
+                }
+                var anchors = doc.querySelectorAll('#document-list .documents li > a');
+                var collection = [];
+                for (var i = 0, len = anchors.length; i < len; i++){
+                    var a = anchors[i];
+                    var title = a.textContent;
+                    var url = uri.resolve(a.getAttribute("href"));
+                    collection.push([
+                        title , url
+                    ]);
+                }
+                return collection;
+            }
+        })()
+    };
+    // Mozilla Developer Network 日本語
+    crawler.domainFunc["jp.developer.mozilla.org"] = {
+        indexTarget : [
+            'https://developer.mozilla.org/ja-JP/docs/all'
+        ],
+        indexer : crawler.domainFunc["developer.mozilla.org"].indexer
+    };
+    // jQuery API document
+    crawler.domainFunc["api.jquery.com"] = {
+        indexTarget : [
+            "http://api.jquery.com/"
+        ],
+        indexer : function(doc){
+            var anchors = $X('id("method-list")//a[@rel="bookmark"]', doc)
+            var collection = [
+            ];
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent;
+                var url = a.href;
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
         }
-        var collection = [];
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.title.replace(" (JavaScript)", "");
-            var url = a.getAttribute("href");
-            collection.push([
-                subject + " / " + title , url
-            ]);
+    };
+    // jQuery unofficial API document(ja)
+    crawler.domainFunc["js.studio-kingdom.com/jquery"] = {
+        indexTarget : [
+            "http://js.studio-kingdom.com/jquery/"
+        ],
+        indexer : function(doc){
+            var anchors = doc.querySelectorAll(".nav-list li > a");
+            var collection = [];
+            var uri = resolveURI("http://js.studio-kingdom.com/");
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent;
+                var url = uri.resolve(a.getAttribute("href"));
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
         }
-        return collection;
-    }
-};
-//  sitepoint CSS reference
-crawler.domainFunc["reference.sitepoint.com/css"] = {
-    indexTarget : [
-        "http://reference.sitepoint.com/css/demos"
-    ],
-    indexer : function(doc){
-        var anchors = doc.querySelectorAll("#contentpanelcontent a");
-        var collection = [];
-        var uri = resolveURI("http://reference.sitepoint.com/");
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent;
-            var url = uri.resolve(a.getAttribute("href"));
-            collection.push([
-                title , url
-            ]);
+    };
+    // Annotated ECMAScript 5.1
+    crawler.domainFunc["es5.github.com"] = {
+        indexTarget : [
+            "http://es5.github.com/"
+        ],
+        indexer : function(doc){
+            var anchors = doc.querySelectorAll('#toc-full a');
+            var collection = [];
+            var uri = resolveURI("http://es5.github.com/");
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent;
+                var url = uri.resolve(a.getAttribute("href"));
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
         }
-        return collection;
-    }
-};
+    };
 
-// Apple iOS Document
-crawler.domainFunc["developer.apple.com/library/ios"] = {
-    category : "iOS",
-    indexTarget : [
-        "http://developer.apple.com/library/ios/sitemap.php"
-    ],
-    indexer : function(doc){
-        var anchors = doc.getElementsByTagName("a");
-        var collection = [];
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var link = a.getAttribute("href");
-            var linkSplit = link.split("/");
-            var title = linkSplit[linkSplit.length - 2].replace("_", " ");
-            var url = a.getAttribute("href");
-            collection.push([
-                title , url
-            ]);
+    // msdn.microsoft.com JavaScript Language Reference
+    crawler.domainFunc["msdn.microsoft.com"] = {
+        // Util : https://gist.github.com/1008796
+        indexTarget : [
+            // http://msdn.microsoft.com/en-us/library/yek4tbz0%28v=VS.94%29.aspx
+            "http://msdn.microsoft.com/en-us/library/s4esdbwz(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/ff818462(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/xyad316h(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/6fw3zxcx(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/c6hac83s(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/ce57k8d5(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/3xcfcb93(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/7th8s2xk(v=VS.94).aspx",
+            // Object
+            "http://msdn.microsoft.com/en-us/library/htbw4ywd(v=VS.94).aspx",
+            // http://msdn.microsoft.com/en-us/library/htbw4ywd%28v=VS.94%29.aspx 以下
+            "http://msdn.microsoft.com/en-us/library/7sw4ddf8(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/k4h76zbx(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/87dw3w1k(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/t7bkhaz6(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/cd9w2te4(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/bs12a9wf(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/6ch9zb09(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/dww52sbt(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/x844tc74(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/52f50e9t(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/cc836458(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/b272f386(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/dwab3ed2(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/kb6te8d3(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/9dthzd08(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/h6e2eb7w(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/ecczf11c(v=VS.94).aspx",
+            "http://msdn.microsoft.com/en-us/library/y39d47w8(v=VS.94).aspx",
+        ],
+        indexer : function(doc){
+            var anchors = doc.querySelectorAll('#Navigation .children > div > a');
+            var subject = doc.querySelector('#Navigation div.toclevel1.current > a').title;
+            subject = subject.replace(" (JavaScript)", "");
+            if (_.isEmpty(anchors) || !subject){
+                return;
+            }
+            var collection = [];
+
+            var uri = resolveURI("http://msdn.microsoft.com/");
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.title.replace(" (JavaScript)", "");
+                var url = uri.resolve(a.getAttribute("href"));
+                collection.push([
+                    subject + " / " + title , url
+                ]);
+            }
+            return collection;
         }
-        return collection;
-    }
-};
-// 福井高専IT研究会Wiki iOSフレームワーク
-// http://profo.jp/wiki/index.php?%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9
-crawler.domainFunc["profo.jp/wiki"] = {
-    category : "iOS",
-    indexTarget : [
-        "http://profo.jp/wiki/index.php?cmd=list"
-    ],
-    indexer : function(doc){
-        var anchors = doc.querySelectorAll("#body a:not([id])");
-        var collection = [];
-        for (var i = 0, len = anchors.length; i < len; i++){
-            var a = anchors[i];
-            var title = a.textContent;
-            var url = a.getAttribute("href");
-            collection.push([
-                title , url
-            ]);
+    };
+    //  sitepoint CSS reference
+    crawler.domainFunc["reference.sitepoint.com/css"] = {
+        indexTarget : [
+            "http://reference.sitepoint.com/css/demos"
+        ],
+        indexer : function(doc){
+            var anchors = doc.querySelectorAll("#contentpanelcontent a");
+            var collection = [];
+            var uri = resolveURI("http://reference.sitepoint.com/");
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent;
+                var url = uri.resolve(a.getAttribute("href"));
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
         }
-        return collection;
-    }
-};
+    };
+
+    // Apple iOS Document
+    crawler.domainFunc["developer.apple.com/library/ios"] = {
+        category : "iOS",
+        indexTarget : [
+            "http://developer.apple.com/library/ios/sitemap.php"
+        ],
+        indexer : function(doc){
+            var anchors = doc.getElementsByTagName("a");
+            var collection = [];
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var link = a.getAttribute("href");
+                var linkSplit = link.split("/");
+                var title = linkSplit[linkSplit.length - 2].replace("_", " ");
+                var url = a.getAttribute("href");
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
+        }
+    };
+    // 福井高専IT研究会Wiki iOSフレームワーク
+    // http://profo.jp/wiki/index.php?%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9
+    crawler.domainFunc["profo.jp/wiki"] = {
+        category : "iOS",
+        indexTarget : [
+            "http://profo.jp/wiki/index.php?cmd=list"
+        ],
+        indexer : function(doc){
+            var anchors = doc.querySelectorAll("#body a:not([id])");
+            var collection = [];
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent;
+                var url = a.getAttribute("href");
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
+        }
+    };
+})();
 
 function req(target, callback, next){
     // util.message(L("通信開始"));
