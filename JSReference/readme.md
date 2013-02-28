@@ -44,7 +44,11 @@ DOMAIN_NAME_SPACEはユニークなものにする必要があるので、その
 
 ##更新履歴
 
-####ver 0.0.7
+#### ver 0.0.8
+
+* jQueryリファレンスの翻訳サイト http://s3pw.com/jQ-JPN/ 追加
+
+#### ver 0.0.7
 
 - MDNのインデックスが作れないのを修正
 
@@ -60,7 +64,7 @@ https://developer.mozilla.org/en-US/docs/all
 - インデックス作成時に前回のデータを消すように修正
 
 
-####ver 0.0.6
+#### ver 0.0.6
 
 対応サイトの追加
 
@@ -69,21 +73,21 @@ https://developer.mozilla.org/en-US/docs/all
 - [profo.jp/wiki]
 
 
-####ver 0.0.5
+#### ver 0.0.5
 インデックス処理が動かないバグを修正。
 
 [jp.developer.mozilla.org] 日本語版のMDNも追加した。
 重複した感じで表示されるので、英語か日本語どちらかに絞るか、jaなどを検索ワードに入れて絞り込んで使う感じで
 
-####ver 0.0.4
+#### ver 0.0.4
 [msdn.microsoft.com] のJavaScript Language Referenceに対応
 取りこぼしがあるかもしれない。
 
 インデックス構築時のメッセージを増やした。
-####ver 0.0.3
+#### ver 0.0.3
 [es5.github.com] に対応
 
-####ver 0.0.2
+#### ver 0.0.2
 [api.jquery.com] に対応
 
 JsReferrence-open-promptコマンドで任意のサイトのみを対象に検索できるようになった。
@@ -94,6 +98,6 @@ JsReferrence-open-promptコマンドで任意のサイトのみを対象に検�
         ext.exec("JsReferrence-open-prompt", ["developer.mozilla.org", "www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"], ev);
     }, 'JsReferrenceのプロンプトを開く', true);
 
-####ver 0.0.1
+#### ver 0.0.1
 
 リリース
