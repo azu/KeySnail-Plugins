@@ -13,11 +13,13 @@ JavaScriptなどのリファレンスのインデックスを構築し、高速�
 - [developer.apple.com/library/ios]
 - [profo.jp/wiki]
 - [js.studio-kingdom.com/jquery]
+- [s3pw.com/jQ-JPN]
 
 [developer.mozilla.org]: http://developer.mozilla.org "Mozilla Developer Network"
 [jp.developer.mozilla.org]: https://developer.mozilla.org/ja "Mozilla Developer Network日本語版"
 [www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/]: http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/ "Under Translation of ECMA-262 3rd Edition"
 [api.jquery.com]: http://api.jquery.com "jQuery API Document"
+[s3pw.com/jQ-JPN]: http://s3pw.com/jQ-JPN/ "jQuery API Documentation 日本語訳"
 [js.studio-kingdom.com/jquery]: http://js.studio-kingdom.com/jquery "js STUDIO | jQuery 日本語リファレンス"
 [es5.github.com]: http://es5.github.com/ "Annotated ECMAScript 5.1"
 [msdn.microsoft.com]: http://msdn.microsoft.com/en-us/library/yek4tbz0%28v=VS.94%29.aspx "MSDN JavaScript Language Reference"
