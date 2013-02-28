@@ -381,7 +381,7 @@ crawler = (function(){
         ],
         indexer : function(doc){
             var anchors = doc.querySelectorAll('#Navigation .children > div > a');
-            var subject = doc.querySelector('#Navigation div.toclevel1.current > a').title;
+            var subject = doc.querySelector('#tocnav div.toclevel1.current > a[id]').title;
             subject = subject.replace(" (JavaScript)", "");
             if (_.isEmpty(anchors) || !subject){
                 return;
