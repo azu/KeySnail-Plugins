@@ -74,7 +74,7 @@ var saveKey = "JsReferrence";
 var crawler = crawler || {};
 crawler = (function(){
     var domainFunc = {}, // ドメイン毎のindexer
-            indexArray = persist.restore(saveKey) || {};
+            indexes = persist.restore(saveKey) || {};
 
     function uniqAry(ary, prop){
         prop = prop || 0;
@@ -90,37 +90,37 @@ crawler = (function(){
     }
 
     var pushIndex = function(domain, collection){
-        if (!indexArray[domain]){
-            indexArray[domain] = [];
+        if (!indexes[domain]){
+            indexes[domain] = [];
         }
-        // 結合して[0,1]重複チェックする
-        indexArray[domain] = uniqAry(indexArray[domain].concat(collection), 1);
-        return indexArray[domain];
+        // 結合して["title","URL"]のURLを重複チェックをして取り除く
+        indexes[domain] = uniqAry(indexes[domain].concat(collection), 1);
+        return indexes[domain];
     }
     var getIndex = function(domains){
         if (!domains){// 指定なしならreturn ALL
-            return indexArray;
+            return indexes;
         }
         var selectedIndex = {};
         for (var i = 0, len = domains.length; i < len; i++){
             var domain = domains[i];
-            if (indexArray[domain]){
-                selectedIndex[domain] = indexArray[domain];
+            if (indexes[domain]){
+                selectedIndex[domain] = indexes[domain];
             }
         }
         return selectedIndex;
     }
     var clearIndex = function(){
-        indexArray = {};
+        indexes = {};
     }
     var saveIndexFile = function(){
-        persist.preserve(indexArray, saveKey);
+        persist.preserve(indexes, saveKey);
         display.showPopup(saveKey, M({
             ja : "インデックスの構築が完了しました",
             en : "Finish index"
         }));
     }
-    var startIndex = function(domains){
+    var startIndex = function(domains, options){
         clearIndex();
         domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
         if (!domains){
@@ -146,13 +146,13 @@ crawler = (function(){
                 en : "Start building " + domain + "'s index."
             }), 3000);
             var domainIndex = cd[domain].indexTarget;// URLの配列
-            var target = getDomainObj(domain);
+            var target = popDomainObj(domain);
             // ドメイン内のindexTargetが無くなるまで再帰的に取得する
             req(target, function(res){
                 saveContentIndex(domain, res);
             }, function next(){
                 if (domainIndex.length > 0){ // 次のtarget pageへ
-                    var target = getDomainObj(domain);
+                    var target = popDomainObj(domain);
                     setTimeout(function(){
                         req(target, function(res){
                             saveContentIndex(domain, res);
@@ -167,13 +167,13 @@ crawler = (function(){
                     }
                 }
             });
-            function getDomainObj(domain){
+            // domainIndexから1つ取り出す
+            function popDomainObj(domain){
                 return {
                     "url" : domainIndex.pop(),
                     "charset" : cd[domain].charset
                 }
             }
-
             // indexerを呼び出して取得結果をpushする
             function saveContentIndex(domain, doc){
                 try{
@@ -282,6 +282,26 @@ crawler = (function(){
             return collection;
         }
     };
+    // jQuery API document(日本語訳)
+    crawler.domainFunc[ "s3pw.com/jQ-JPN"] = {
+        indexTarget : [
+            "http://s3pw.com/jQ-JPN/"
+        ],
+        indexer : function(doc){
+            var anchors = doc.querySelectorAll("#api-list > a");
+            var collection = [];
+            var uri = resolveURI("http://s3pw.com/jQ-JPN/");
+            for (var i = 0, len = anchors.length; i < len; i++){
+                var a = anchors[i];
+                var title = a.textContent;
+                var url = uri.resolve(a.getAttribute("href"));
+                collection.push([
+                    title , url
+                ]);
+            }
+            return collection;
+        }
+    };
     // jQuery unofficial API document(ja)
     crawler.domainFunc["js.studio-kingdom.com/jquery"] = {
         indexTarget : [
@@ -302,6 +322,7 @@ crawler = (function(){
             return collection;
         }
     };
+
     // Annotated ECMAScript 5.1
     crawler.domainFunc["es5.github.com"] = {
         indexTarget : [
