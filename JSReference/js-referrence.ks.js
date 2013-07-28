@@ -1,18 +1,18 @@
 var PLUGIN_INFO =
-        <KeySnailPlugin>
-            <name>JsReferrence</name>
-            <description>JavaScriptリファレンスを引く</description>
-            <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
-            <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
-            <version>0.0.8</version>
-            <minVersion>1.8.5</minVersion>
-            <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
-            <license>The MIT License</license>
-            <provides>
-                <ext>JsReferrence-open-prompt</ext>
-                <ext>JsReferrence-reIndex</ext>
-            </provides>
-            <detail><![CDATA[
+    <KeySnailPlugin>
+        <name>JsReferrence</name>
+        <description>JavaScriptリファレンスを引く</description>
+        <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/js-referrence.ks.js</updateURL>
+        <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/JSReference/MyIcon.png</iconURL>
+        <version>0.0.8</version>
+        <minVersion>1.8.5</minVersion>
+        <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
+        <license>The MIT License</license>
+        <provides>
+            <ext>JsReferrence-open-prompt</ext>
+            <ext>JsReferrence-reIndex</ext>
+        </provides>
+        <detail><![CDATA[
             === 使い方 ===
 このプラグインをインストールすることにより
 - JsReferrence-open-prompt
@@ -68,19 +68,19 @@ crawler.domainFunc["DOMAIN_NAME_SPACE"] = {
 https://github.com/azu/KeySnail-Plugins/tree/master/JSReference
 
 ]]></detail>
-        </KeySnailPlugin>;
+    </KeySnailPlugin>;
 
 var saveKey = "JsReferrence";
 var crawler = crawler || {};
-crawler = (function(){
+crawler = (function () {
     var domainFunc = {}, // ドメイン毎のindexer
-            indexes = persist.restore(saveKey) || {};
+        indexes = persist.restore(saveKey) || {};
 
-    function uniqAry(ary, prop){
+    function uniqAry(ary, prop) {
         prop = prop || 0;
         var checkAry = [];// 重複チェック用
-        return _.reduce(ary, function(memo, el, i){
-            if (0 == i || checkAry.indexOf(el[prop]) === -1){
+        return _.reduce(ary, function (memo, el, i) {
+            if (0 == i || checkAry.indexOf(el[prop]) === -1) {
                 // memoにまだ無い要素だったらpushする
                 memo[memo.length] = el;
                 checkAry.push(el[prop])
@@ -89,134 +89,135 @@ crawler = (function(){
         }, []);// memoの初期値
     }
 
-    var pushIndex = function(domain, collection){
-        if (!indexes[domain]){
+    var pushIndex = function (domain, collection) {
+        if (!indexes[domain]) {
             indexes[domain] = [];
         }
         // 結合して["title","URL"]のURLを重複チェックをして取り除く
         indexes[domain] = uniqAry(indexes[domain].concat(collection), 1);
         return indexes[domain];
     }
-    var getIndex = function(domains){
-        if (!domains){// 指定なしならreturn ALL
+    var getIndex = function (domains) {
+        if (!domains) {// 指定なしならreturn ALL
             return indexes;
         }
         var selectedIndex = {};
-        for (var i = 0, len = domains.length; i < len; i++){
+        for (var i = 0, len = domains.length; i < len; i++) {
             var domain = domains[i];
-            if (indexes[domain]){
+            if (indexes[domain]) {
                 selectedIndex[domain] = indexes[domain];
             }
         }
         return selectedIndex;
     }
-    var clearIndex = function(){
+    var clearIndex = function () {
         indexes = {};
     }
-    var saveIndexFile = function(){
+    var saveIndexFile = function () {
         persist.preserve(indexes, saveKey);
         display.showPopup(saveKey, M({
-            ja : "インデックスの構築が完了しました",
-            en : "Finish index"
+            ja: "インデックスの構築が完了しました",
+            en: "Finish index"
         }));
     }
-    var startIndex = function(domains, options){
+    var startIndex = function (domains, options) {
         clearIndex();
         domains = domains || _.keys(crawler.domainFunc);// ["com.exsample" ,"jp.hoge"]
-        if (!domains){
+        if (!domains) {
             util.message(L("インデックス構築のドメインが指定されていない"));
             return;
-        }else if (!_.isArray(domains)){
+        } else if (!_.isArray(domains)) {
             util.message(L("ドメインは配列でして下さい"));
             return;
         }
         display.showPopup(saveKey, M({
-            ja : domains.length + "個のインデックスを構築します",
-            en : "Start building " + domains.length + " index."
+            ja: domains.length + "個のインデックスを構築します",
+            en: "Start building " + domains.length + " index."
         }));
         reIndex(domains);
     }
-    var reIndex = function(domains){
+    var reIndex = function (domains) {
         var cd = crawler.domainFunc;
         domainIndexer(domains.pop());
-        function domainIndexer(domain){
+        function domainIndexer(domain) {
             var indexCount = 0
             display.echoStatusBar(M({
-                ja : domain + "のIndexを構築開始します",
-                en : "Start building " + domain + "'s index."
+                ja: domain + "のIndexを構築開始します",
+                en: "Start building " + domain + "'s index."
             }), 3000);
             var domainIndex = cd[domain].indexTarget;// URLの配列
             var target = popDomainObj(domain);
             // ドメイン内のindexTargetが無くなるまで再帰的に取得する
-            req(target, function(res){
+            req(target, function (res) {
                 saveContentIndex(domain, res);
-            }, function next(){
-                if (domainIndex.length > 0){ // 次のtarget pageへ
+            }, function next() {
+                if (domainIndex.length > 0) { // 次のtarget pageへ
                     var target = popDomainObj(domain);
-                    setTimeout(function(){
-                        req(target, function(res){
+                    setTimeout(function () {
+                        req(target, function (res) {
                             saveContentIndex(domain, res);
                         }, next);
                     }.bind(this), 500);
-                }else{
-                    if (domains.length > 0){// 次のドメインへ
+                } else {
+                    if (domains.length > 0) {// 次のドメインへ
                         var nextDomain = domains.pop();
                         domainIndexer(nextDomain);
-                    }else{// 取得対象がなくなったのでファイルに保存
+                    } else {// 取得対象がなくなったのでファイルに保存
                         saveIndexFile();
                     }
                 }
             });
             // domainIndexから1つ取り出す
-            function popDomainObj(domain){
+            function popDomainObj(domain) {
                 return {
-                    "url" : domainIndex.pop(),
-                    "charset" : cd[domain].charset
+                    "url": domainIndex.pop(),
+                    "charset": cd[domain].charset
                 }
             }
+
             // indexerを呼び出して取得結果をpushする
-            function saveContentIndex(domain, doc){
-                try{
+            function saveContentIndex(domain, doc) {
+                try {
                     // this は cd[domain] にする
                     var collection = cd[domain].indexer.call(cd[domain], doc);
-                    if (collection){
+                    if (collection) {
                         crawler.pushIndex(domain, collection);
                         display.echoStatusBar(M({
-                            ja : domain + "のIndexを構築中... " + (indexCount++)
+                            ja: domain + "のIndexを構築中... " + (indexCount++)
                         }), 3000);
                     }
-                }catch (e){
+                } catch (e) {
                     util.message(L(e + "\n"
-                            + domain + "のindexerでエラー"));
+                        + domain + "のindexerでエラー"));
                 }
             }
 
         }
     }
     return {
-        "getIndex" : getIndex,
-        "domainFunc" : domainFunc,
-        "pushIndex" : pushIndex,
-        "startIndex" : startIndex
+        "getIndex": getIndex,
+        "domainFunc": domainFunc,
+        "pushIndex": pushIndex,
+        "startIndex": startIndex
     };
 })();
 /*
  * SITE INFO
  */
-(function(){
+(function () {
 
     // Under Translation of ECMA-262 3rd Edition
     crawler.domainFunc["www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/"] = {
-        charset : "Shift-jis",
-        indexTarget : [
+        charset: "Shift-jis",
+        indexTarget: [
             "http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = $X("//dt/a", doc);
             var uri = resolveURI("http://www2u.biglobe.ne.jp/~oz-07ams/prog/ecma262r3/fulltoc.html");
             var collection = [
             ];
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent.replace(/^[\d\s.]*/, "");
                 var url = uri.resolve(a.getAttribute("href"));
@@ -230,20 +231,20 @@ crawler = (function(){
 
     // Mozilla Developer Network
     crawler.domainFunc["developer.mozilla.org"] = {
-        indexTarget : [
+        indexTarget: [
             'https://developer.mozilla.org/en-US/docs/all'
         ],
-        indexer : (function(){
+        indexer: (function () {
             var uri = resolveURI("https://developer.mozilla.org/");
-            return function(doc){
+            return function (doc) {
                 // next linkを辿ってクロールする
                 var nextLink = doc.querySelector('#document-list .next > a');
-                if (nextLink){
+                if (nextLink) {
                     this.indexTarget.push(nextLink.href);
                 }
                 var anchors = doc.querySelectorAll('#document-list .documents li > a');
                 var collection = [];
-                for (var i = 0, len = anchors.length; i < len; i++){
+                for (var i = 0, len = anchors.length; i < len; i++) {
                     var a = anchors[i];
                     var title = a.textContent;
                     var url = uri.resolve(a.getAttribute("href"));
@@ -257,21 +258,20 @@ crawler = (function(){
     };
     // Mozilla Developer Network 日本語
     crawler.domainFunc["jp.developer.mozilla.org"] = {
-        indexTarget : [
+        indexTarget: [
             'https://developer.mozilla.org/ja-JP/docs/all'
         ],
-        indexer : crawler.domainFunc["developer.mozilla.org"].indexer
+        indexer: crawler.domainFunc["developer.mozilla.org"].indexer
     };
     // jQuery API document
     crawler.domainFunc["api.jquery.com"] = {
-        indexTarget : [
+        indexTarget: [
             "http://api.jquery.com/"
         ],
-        indexer : function(doc){
-            var anchors = $X('id("method-list")//a[@rel="bookmark"]', doc)
-            var collection = [
-            ];
-            for (var i = 0, len = anchors.length; i < len; i++){
+        indexer: function (doc) {
+            var anchors = doc.querySelectorAll('#content a[rel="bookmark"]')
+            var collection = [];
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent;
                 var url = a.href;
@@ -284,14 +284,14 @@ crawler = (function(){
     };
     // jQuery API document(日本語訳)
     crawler.domainFunc[ "s3pw.com/jQ-JPN"] = {
-        indexTarget : [
+        indexTarget: [
             "http://s3pw.com/jQ-JPN/"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.querySelectorAll("#api-list > a");
             var collection = [];
             var uri = resolveURI("http://s3pw.com/jQ-JPN/");
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent;
                 var url = uri.resolve(a.getAttribute("href"));
@@ -304,14 +304,14 @@ crawler = (function(){
     };
     // jQuery unofficial API document(ja)
     crawler.domainFunc["js.studio-kingdom.com/jquery"] = {
-        indexTarget : [
+        indexTarget: [
             "http://js.studio-kingdom.com/jquery/"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.querySelectorAll(".nav-list li > a");
             var collection = [];
             var uri = resolveURI("http://js.studio-kingdom.com/");
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent;
                 var url = uri.resolve(a.getAttribute("href"));
@@ -325,14 +325,14 @@ crawler = (function(){
 
     // Annotated ECMAScript 5.1
     crawler.domainFunc["es5.github.com"] = {
-        indexTarget : [
+        indexTarget: [
             "http://es5.github.com/"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.querySelectorAll('#toc-full a');
             var collection = [];
             var uri = resolveURI("http://es5.github.com/");
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent;
                 var url = uri.resolve(a.getAttribute("href"));
@@ -347,7 +347,7 @@ crawler = (function(){
     // msdn.microsoft.com JavaScript Language Reference
     crawler.domainFunc["msdn.microsoft.com"] = {
         // Util : https://gist.github.com/1008796
-        indexTarget : [
+        indexTarget: [
             // http://msdn.microsoft.com/en-us/library/yek4tbz0%28v=VS.94%29.aspx
             "http://msdn.microsoft.com/en-us/library/s4esdbwz(v=VS.94).aspx",
             "http://msdn.microsoft.com/en-us/library/ff818462(v=VS.94).aspx",
@@ -379,17 +379,17 @@ crawler = (function(){
             "http://msdn.microsoft.com/en-us/library/ecczf11c(v=VS.94).aspx",
             "http://msdn.microsoft.com/en-us/library/y39d47w8(v=VS.94).aspx",
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.querySelectorAll('#Navigation .children > div > a');
             var subject = doc.querySelector('#tocnav div.toclevel1.current > a[id]').title;
             subject = subject.replace(" (JavaScript)", "");
-            if (_.isEmpty(anchors) || !subject){
+            if (_.isEmpty(anchors) || !subject) {
                 return;
             }
             var collection = [];
 
             var uri = resolveURI("http://msdn.microsoft.com/");
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.title.replace(" (JavaScript)", "");
                 var url = uri.resolve(a.getAttribute("href"));
@@ -402,14 +402,14 @@ crawler = (function(){
     };
     //  sitepoint CSS reference
     crawler.domainFunc["reference.sitepoint.com/css"] = {
-        indexTarget : [
+        indexTarget: [
             "http://reference.sitepoint.com/css/demos"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.querySelectorAll("#contentpanelcontent a");
             var collection = [];
             var uri = resolveURI("http://reference.sitepoint.com/");
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent;
                 var url = uri.resolve(a.getAttribute("href"));
@@ -423,14 +423,14 @@ crawler = (function(){
 
     // Apple iOS Document
     crawler.domainFunc["developer.apple.com/library/ios"] = {
-        category : "iOS",
-        indexTarget : [
+        category: "iOS",
+        indexTarget: [
             "http://developer.apple.com/library/ios/sitemap.php"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.getElementsByTagName("a");
             var collection = [];
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var link = a.getAttribute("href");
                 var linkSplit = link.split("/");
@@ -446,14 +446,14 @@ crawler = (function(){
     // 福井高専IT研究会Wiki iOSフレームワーク
     // http://profo.jp/wiki/index.php?%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9
     crawler.domainFunc["profo.jp/wiki"] = {
-        category : "iOS",
-        indexTarget : [
+        category: "iOS",
+        indexTarget: [
             "http://profo.jp/wiki/index.php?cmd=list"
         ],
-        indexer : function(doc){
+        indexer: function (doc) {
             var anchors = doc.querySelectorAll("#body a:not([id])");
             var collection = [];
-            for (var i = 0, len = anchors.length; i < len; i++){
+            for (var i = 0, len = anchors.length; i < len; i++) {
                 var a = anchors[i];
                 var title = a.textContent;
                 var url = a.getAttribute("href");
@@ -466,10 +466,10 @@ crawler = (function(){
     };
 })();
 
-function req(target, callback, next){
+function req(target, callback, next) {
     // util.message(L("通信開始"));
     var xhr = new XMLHttpRequest();
-    xhr.onload = function(){
+    xhr.onload = function () {
         callback(createHTMLDocument_XSLT(xhr.responseText));
         next();
     }
@@ -481,113 +481,113 @@ function req(target, callback, next){
  * プロンプトを開き、リファレンスの検索を開始する
  * @param domains ドメインの配列を指定する事ができる
  */
-function openPrompt(domains){
+function openPrompt(domains) {
     // 指定したDomainだけのIndexを取り出す || 無指定ならALL
     var indexPages = crawler.getIndex(domains || null);
-    if (_.isEmpty(indexPages)){
+    if (_.isEmpty(indexPages)) {
         display.showPopup(saveKey, M({
-            ja : "インデックスがないので構築します…しばしお待ち",
-            en : "No Index,start building index."
+            ja: "インデックスがないので構築します…しばしお待ち",
+            en: "No Index,start building index."
         }));
         crawler.startIndex();
         return;
     }
     var collection = [
     ];
-    for (var i in indexPages){
+    for (var i in indexPages) {
         collection = collection.concat(indexPages[i]);
     }
     prompt.selector({
-        message : "pattern:",
-        collection : collection,
-        flags : [
+        message: "pattern:",
+        collection: collection,
+        flags: [
             0 , 0
         ],
-        style : [
+        style: [
             null, style.prompt.description
         ],
-        header : [
+        header: [
             "Title", "URL"
         ],
-        width : [
+        width: [
             25, 45
         ],
-        actions : [
+        actions: [
             [
-                function(aIndex){
-                    if (aIndex >= 0){
+                function (aIndex) {
+                    if (aIndex >= 0) {
                         openUILinkIn(getURL(aIndex), "current");
                     }
                 }, "Open Link in current tab"
             ],
             [
-                function(aIndex){
-                    if (aIndex >= 0){
+                function (aIndex) {
+                    if (aIndex >= 0) {
                         openUILinkIn(getURL(aIndex), "tab");
                     }
                 }, "Open Link in new tab (foreground)"
             ],
             [
-                function(aIndex){
-                    if (aIndex >= 0){
+                function (aIndex) {
+                    if (aIndex >= 0) {
                         openUILinkIn(getURL(aIndex), "tabshifted");
                     }
                 }, "Open Link in new tab (background)"
             ],
             [
-                function(aIndex){
-                    if (aIndex >= 0){
+                function (aIndex) {
+                    if (aIndex >= 0) {
                         openUILinkIn(getURL(aIndex), "window");
                     }
                 }, "Open Link in new window"
             ],
             [
-                function(aIndex){
-                    if (aIndex >= 0){
+                function (aIndex) {
+                    if (aIndex >= 0) {
                         openUILinkIn(getURL(aIndex), "current");
                     }
                 }, "Open Link in current tab"
             ],
         ]
     });
-    function getURL(index){
+    function getURL(index) {
         return collection[index][1];
     }
 }
 // コマンド追加
 ext.add(saveKey + "-reIndex",
-        function(aEvent, aArg){
-            crawler.startIndex(aArg || null);
-        },
-        M({ja : saveKey + "のインデックスを作り直す",
-            en : "reindex of" + saveKey}));
+    function (aEvent, aArg) {
+        crawler.startIndex(aArg || null);
+    },
+    M({ja: saveKey + "のインデックスを作り直す",
+        en: "reindex of" + saveKey}));
 ext.add(saveKey + "-open-prompt",
-        function(aEvent, aArg){
-            openPrompt(aArg || null);
-        },
-        M({ja : saveKey + "で検索を開始する",
-            en : "open prompt of" + saveKey}));
+    function (aEvent, aArg) {
+        openPrompt(aArg || null);
+    },
+    M({ja: saveKey + "で検索を開始する",
+        en: "open prompt of" + saveKey}));
 
 // $X on XHTML
 // @target Freifox3, Chrome3, Safari4, Opera10
 // @source http://gist.github.com/184276.txt
-function $X(exp, context){
+function $X(exp, context) {
     context || (context = document);
     var _document = context.ownerDocument || context,
-            documentElement = _document.documentElement,
-            isXHTML = documentElement.tagName !== 'HTML' && _document.createElement('p').tagName === 'p',
-            defaultPrefix = null;
-    if (isXHTML){
+        documentElement = _document.documentElement,
+        isXHTML = documentElement.tagName !== 'HTML' && _document.createElement('p').tagName === 'p',
+        defaultPrefix = null;
+    if (isXHTML) {
         defaultPrefix = '__default__';
         exp = addDefaultPrefix(exp, defaultPrefix);
     }
-    function resolver(prefix){
+    function resolver(prefix) {
         return context.lookupNamespaceURI(prefix === defaultPrefix ? null : prefix) ||
-                documentElement.namespaceURI || "";
+            documentElement.namespaceURI || "";
     }
 
     var result = _document.evaluate(exp, context, resolver, XPathResult.ANY_TYPE, null);
-    switch (result.resultType){
+    switch (result.resultType) {
         case XPathResult.STRING_TYPE :
             return result.stringValue;
         case XPathResult.NUMBER_TYPE :
@@ -598,23 +598,23 @@ function $X(exp, context){
             // not ensure the order.
             var ret = [
             ], i = null;
-            while (i = result.iterateNext()){
+            while (i = result.iterateNext()) {
                 ret.push(i);
             }
             return ret;
     }
 }
 
-function createHTMLDocument_XSLT(source){
+function createHTMLDocument_XSLT(source) {
     var processor = new XSLTProcessor();
     var sheet = new DOMParser().parseFromString(
-            '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' +
-                    '<xsl:output method="html"/>' +
-                    '<xsl:template match="/">' +
-                    '<html><head><title></title></head><body></body></html>' +
-                    '</xsl:template>' +
-                    '</xsl:stylesheet>',
-            'application/xml'
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' +
+            '<xsl:output method="html"/>' +
+            '<xsl:template match="/">' +
+            '<html><head><title></title></head><body></body></html>' +
+            '</xsl:template>' +
+            '</xsl:stylesheet>',
+        'application/xml'
     );
     processor.importStylesheet(sheet);
     var doc = processor.transformToDocument(sheet);
@@ -626,7 +626,7 @@ function createHTMLDocument_XSLT(source){
 }
 // nsURIを使って相対URLを絶対URLにするインターフェースを作る
 // http://d.hatena.ne.jp/brazil/20080416/1208325257
-function resolveURI(URI){
+function resolveURI(URI) {
     var IOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
     return IOService.newURI(URI, null, null).QueryInterface(Ci.nsIURL);
 }
