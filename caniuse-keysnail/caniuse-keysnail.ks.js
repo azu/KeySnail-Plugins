@@ -105,7 +105,7 @@ function searchOn() {
                 flags: [0, 0, 0, 0, IGNORE | HIDDEN],
                 style: [null, null, "color:#001d6b;", "color:#001d6b;"],
                 header: ["title", "description", "categories", "keywords"],
-                width: [20, 40, 10, 10],
+                width: [20, 60, 10, 10],
                 actions: [
                     [function (aIndex) {
                         if (aIndex >= 0) {
