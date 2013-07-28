@@ -98,7 +98,6 @@ function searchOn() {
     });
 
     function openPrompt(dataTable) {
-        fbug(dataTable[0]);
         prompt.selector(
             {
                 message: "pattern:",
