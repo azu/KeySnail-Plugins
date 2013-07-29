@@ -17,21 +17,6 @@ Search on http://caniuse.com/
 ]]></detail>
     </KeySnailPlugin>;
 
-var { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
-var loader = Loader.Loader({
-    paths: {
-        "sdk/": "resource://gre/modules/commonjs/sdk/",
-        "": "globals:///"
-    },
-    resolve: function (id, base) {
-        if (id == "chrome" || id.startsWith("@"))
-            return id;
-        return Loader.resolve(id, base);
-    }
-});
-var module = Loader.Module("main", "scratchpad://");
-var require = Loader.Require(loader, module);
-
 /**
  * CanIuse
  * @constructor
@@ -39,23 +24,17 @@ var require = Loader.Require(loader, module);
 function CanIuse() {
 }
 CanIuse.prototype.dataJSONURL = "https://raw.github.com/Fyrd/caniuse/master/data.json";
-/**
- *
- * @returns {Object}
- */
 CanIuse.prototype.getDataJSON = function (callback) {
-    var Request = require("sdk/request").Request;
-    Request({
-        url: this.dataJSONURL,
-        onComplete: function (response) {
-            if (response.json) {
-                callback(null, response.json);
-            } else {
-                throw new Error("Not Found!");
-            }
-        }
-    }).get();
-    return {};
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+        callback(null, xhr.response);
+    };
+    xhr.onerror = function () {
+        callback(new Error(xhr.statusText), xhr.response);
+    };
+    xhr.open("get", this.dataJSONURL, true);
+    xhr.responseType = 'json';
+    xhr.send();
 };
 /**
  *
@@ -111,7 +90,22 @@ function searchOn() {
                         if (aIndex >= 0) {
                             openUILinkIn(getURL(aIndex), "tab");
                         }
-                    }, "Open Link in new tab (foreground)"]
+                    }, M({en: "Open Link in new tab (foreground)", ja: "新しいタブで開く (前面)"})],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "tabshifted");
+                        }
+                    }, M({en: "Open Link in new tab (background)", ja: "新しいタブで開く (背面)"})],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "current");
+                        }
+                    }, M({en: "Open Link in current tab", ja: "現在のタブで開く"})],
+                    [function (aIndex) {
+                        if (aIndex >= 0) {
+                            openUILinkIn(getURL(aIndex), "window");
+                        }
+                    }, M({en: "Open Link in new window", ja: "新しいウィンドウで開く (背面)"})]
                 ]
             }
         );
