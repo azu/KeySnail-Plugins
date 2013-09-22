@@ -1,0 +1,34 @@
+[
+    {
+        "title": "plain",
+        "format": "%TITLE%\n%URL%"
+    },
+    {
+        "title": "HTML",
+        "format": "<a href=\"%URL%\" title=\"%TITLE\">%TEXT%</a>"
+    },
+    {
+        "title": "引用",
+        "format": "<blockquote cite=\"%url%\"\n title=\"%title%\">\n<p>%text%</p>\n<cite>\n <a href=\"%url%\">%title%</a>\n</cite>\n</blockquote>"
+    },
+    {
+        "title": "JSer",
+        "format": "<blockquote title=\"%title%\">\n<p class=\"jser-sitelink\"><strong>%text%</strong><br /> <a href=\"%url%\" title=\"%text%\">%url%</a></p>\n</blockquote>"
+    },
+    {
+        "title": "Markdown",
+        "format": "[%text%](%url% \"%text%\")"
+    },
+    {
+        "title": "@Markdown",
+        "format": "[%text%]: %url%  \"%title%\""
+    },
+    {
+        "title": "rst",
+        "format": "`%text% <%url%>`_"
+    },
+    {
+        "title": "@rst",
+        "format": ".. _`%text%`: %url%"
+    }
+]

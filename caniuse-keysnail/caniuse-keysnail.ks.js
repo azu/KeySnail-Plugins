@@ -70,6 +70,7 @@ function searchOn() {
     var canIuse = new CanIuse();
     canIuse.getDataJSON(function (error, json) {
         if (error != null) {
+            display.showPopup("Can I use... error", error);
             return;
         }
         var dataTable = canIuse.buildDataTable(json);
