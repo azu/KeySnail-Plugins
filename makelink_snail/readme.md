@@ -36,3 +36,8 @@ plugins.options["makelink_snail"] = [
     }
 ];
 ```
+
+
+## 謝辞
+
+[現在開いているページのリンクをいろんなフォーマットで取得する KeySnail プラグイン &quot;LinkSnail&quot; - Thanks Driven Life](http://gongo.hatenablog.com/entry/2012/01/04/204754 "現在開いているページのリンクをいろんなフォーマットで取得する KeySnail プラグイン &quot;LinkSnail&quot; - Thanks Driven Life") を参考にしました
