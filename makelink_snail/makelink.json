@@ -5,30 +5,34 @@
     },
     {
         "title": "HTML",
-        "format": "<a href=\"%URL%\" title=\"%TITLE\">%TEXT%</a>"
+        "format": "<a href=\"%URL%\" title=\"%TITLE%\">%TEXT%</a>"
     },
     {
         "title": "引用",
-        "format": "<blockquote cite=\"%url%\"\n title=\"%title%\">\n<p>%text%</p>\n<cite>\n <a href=\"%url%\">%title%</a>\n</cite>\n</blockquote>"
+        "format": "<blockquote cite=\"%url%\"\n title=\"%title%\">\n<p>%text_br%</p>\n<cite>\n <a href=\"%url%\">%title%</a>\n</cite>\n</blockquote>"
     },
     {
         "title": "JSer",
-        "format": "<blockquote title=\"%title%\">\n<p class=\"jser-sitelink\"><strong>%text%</strong><br /> <a href=\"%url%\" title=\"%text%\">%url%</a></p>\n</blockquote>"
+        "format": "<blockquote title=\"%title%\">\n<p class=\"jser-sitelink\"><strong>%text_br%</strong><br /> <a href=\"%url%\" title=\"%text%\">%url%</a></p>\n</blockquote>"
     },
     {
         "title": "Markdown",
-        "format": "[%text%](%url% \"%text%\")"
+        "format": "[%text%](%url% \"%text%\")",
+        "plain": true
     },
     {
         "title": "@Markdown",
-        "format": "[%text%]: %url%  \"%title%\""
+        "format": "[%text%]: %url%  \"%title%\"",
+        "plain": true
     },
     {
         "title": "rst",
-        "format": "`%text% <%url%>`_"
+        "format": "`%text% <%url%>`_",
+        "plain": true
     },
     {
         "title": "@rst",
-        "format": ".. _`%text%`: %url%"
+        "format": ".. _`%text%`: %url%",
+        "plain": true
     }
 ]

@@ -58,7 +58,7 @@ key.setGlobalKey(['C-c', 't'], function (ev, arg) {
 var makeLinkSnail = (function () {
     var formatCollection = plugins.options["makelink_snail"] || [];
 
-    var { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
+    var Loader = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {}).Loader;
     var loader = Loader.Loader({
         paths: {
             "sdk/": "resource://gre/modules/commonjs/sdk/",
@@ -74,10 +74,30 @@ var makeLinkSnail = (function () {
     var module = Loader.Module("main");
     var require = Loader.Require(loader, module);
 
+    var escapeHTMLEntity = (function () {
+        var tagsToReplace = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&#34;',
+            "'": '&#39;'
+        };
+        return function (text) {
+            return text.replace(/[&<>'"]/g, function (tag) {
+                return tagsToReplace[tag] || tag;
+            })
+        };
+    })();
 
     function copyLink(link) {
         var clipboard = require("sdk/clipboard");
         clipboard.set(link, "html");
+        display.showPopup("MakeLinkSnail", link);
+    }
+
+    function copyLinkAsPlainText(link) {
+        var clipboard = require("sdk/clipboard");
+        clipboard.set(link, "text");
         display.showPopup("MakeLinkSnail", link);
     }
 
@@ -88,8 +108,9 @@ var makeLinkSnail = (function () {
         var selectText = parameters.selectText || title;
         var link = format;
         link = link.replace("%URL%", uri, "ig");
-        link = link.replace("%TITLE%", title, "ig");
-        link = link.replace("%TEXT%", selectText, "ig");
+        link = link.replace("%TITLE%", escapeHTMLEntity(title), "ig");
+        link = link.replace("%TEXT%", escapeHTMLEntity(selectText).replace("\n", "", "g"), "ig");
+        link = link.replace("%TEXT_BR%", escapeHTMLEntity(selectText), "ig");
         return link;
     }
 
@@ -114,23 +135,12 @@ var makeLinkSnail = (function () {
                 var selectText = content.getSelection().toString();
                 var format = formatCollection[index]["format"];
                 var parameters = {format: format, title: title, uri: uri, selectText: selectText};
-                copyLink(formatTextAndURI(parameters));
+                if (formatCollection[index]["plain"]) {
+                    copyLinkAsPlainText(formatTextAndURI(parameters));
+                } else {
+                    copyLink(formatTextAndURI(parameters));
+                }
             });
-        },
-        copyAllPage: function () {
-            formatSelector(function (index) {
-                var format = formatCollection[index][1];
-                var a = [(function () {
-                    var browser = tab.linkedBrowser;
-                    var win = browser.contentWindow;
-
-                    var title = tab.label;
-                    var url = win.location.href;
-                    return formatTextAndURI({format: format, title: title, uri: url});
-                })() for each (tab in Array.slice(gBrowser.mTabContainer.childNodes))];
-
-                copyLink(a.join("\n"));
-            })
         }
     };
 
@@ -141,7 +151,4 @@ plugins.withProvides(function (provide) {
     provide("makeLinkSnail", function () {
         makeLinkSnail.copyThisPage();
     }, "makeLinkSnail");
-    provide("makeLinkSnail-copy-all", function () {
-        makeLinkSnail.copyAllPage();
-    }, "makeLinkSnail Copy all tabs");
 }, PLUGIN_INFO);
