@@ -3,7 +3,7 @@ let PLUGIN_INFO = <KeySnailPlugin>
     <description>ページの最終更新日を表示する</description>
     <updateURL>https://github.com/azu/KeySnail-Plugins/raw/master/displayLastModified/displayLastModified.ks.js</updateURL>
     <iconURL>https://github.com/azu/KeySnail-Plugins/raw/master/displayLastModified/MyIcon.png</iconURL>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <minVersion>1.8.5</minVersion>
     <author mail="info@efcl.info" homepage="http://efcl.info/">azu</author>
     <license>The MIT License</license>
@@ -51,7 +51,7 @@ function displayLastModifiedURL(){
             if (site && !_.isElement(site)){
                 return log("siteがなかった…");
             }
-            var lastModifyElement = $X('.//span[@class="f std"]', site);
+            var lastModifyElement = $X('.//span[@class="f"]', site);
             if (lastModifyElement && _.isElement(lastModifyElement[0])){
                 return lastModifyElement[0].textContent;
             }
@@ -62,14 +62,14 @@ function displayLastModifiedURL(){
     req(request);
 }
 ext.add("displayLastModified-URL",
-        displayLastModifiedURL,
-        M({ja : "ページの最終更新日を表示",
-            en : "display page's last modified"}));
+    displayLastModifiedURL,
+    M({ja : "ページの最終更新日を表示",
+        en : "display page's last modified"}));
 function log(){
     var DEBUG = false;
-    if (DEBUG)
-        fbug && fbug(arguments);
-    // util.message(L(arguments));
+    if (DEBUG){
+        console.log(arguments);
+    }
 }
 function req(target){
     // util.message(L("通信開始"));
@@ -89,13 +89,13 @@ function req(target){
 function createHTMLDocument_XSLT(source){
     var processor = new XSLTProcessor();
     var sheet = new DOMParser().parseFromString(
-            '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' +
-                    '<xsl:output method="html"/>' +
-                    '<xsl:template match="/">' +
-                    '<html><head><title></title></head><body></body></html>' +
-                    '</xsl:template>' +
-                    '</xsl:stylesheet>',
-            'application/xml'
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' +
+            '<xsl:output method="html"/>' +
+            '<xsl:template match="/">' +
+            '<html><head><title></title></head><body></body></html>' +
+            '</xsl:template>' +
+            '</xsl:stylesheet>',
+        'application/xml'
     );
     processor.importStylesheet(sheet);
     var doc = processor.transformToDocument(sheet);
@@ -111,16 +111,16 @@ function createHTMLDocument_XSLT(source){
 function $X(exp, context){
     context || (context = document);
     var _document = context.ownerDocument || context,
-            documentElement = _document.documentElement,
-            isXHTML = documentElement.tagName !== 'HTML' && _document.createElement('p').tagName === 'p',
-            defaultPrefix = null;
+        documentElement = _document.documentElement,
+        isXHTML = documentElement.tagName !== 'HTML' && _document.createElement('p').tagName === 'p',
+        defaultPrefix = null;
     if (isXHTML){
         defaultPrefix = '__default__';
         exp = addDefaultPrefix(exp, defaultPrefix);
     }
     function resolver(prefix){
         return context.lookupNamespaceURI(prefix === defaultPrefix ? null : prefix) ||
-                documentElement.namespaceURI || "";
+            documentElement.namespaceURI || "";
     }
 
     var result = _document.evaluate(exp, context, resolver, XPathResult.ANY_TYPE, null);
