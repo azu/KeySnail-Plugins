@@ -30,29 +30,29 @@ ext.exec('displayLastModified-URL', "http://efcl.info/");
 ||<
        ]]></detail>
 </KeySnailPlugin>;
-function displayLastModifiedURL(){
+function displayLastModifiedURL() {
     var requestURL = arguments[1] || window.content.location.href;
     var request = {
-        url : "http://www.google.com/search?num=1&tbs=qdr%3Ay15&q=site%3A" + encodeURIComponent(requestURL),
-        onload : function(doc){
+        url: "http://www.google.com/search?num=1&tbs=qdr%3Ay15&q=site%3A" + encodeURIComponent(requestURL),
+        onload: function (doc) {
             var dayText = getLastModified(doc);
-            if (!dayText){
-                display.prettyPrint(L("×"), { timeout : 500, fade : 500 })
-            }else{
-                display.prettyPrint(dayText, { timeout : 3000, fade : 300 });// 日付を表示
+            if (!dayText) {
+                display.prettyPrint(L("×"), { timeout: 500, fade: 500 })
+            } else {
+                display.prettyPrint(dayText, { timeout: 3000, fade: 300 });// 日付を表示
             }
         }
     }
 
-    function getLastModified(doc){
+    function getLastModified(doc) {
         var siteList = $X('//div[@class="s"]', doc);
-        for (var i = 0, len = siteList.length; i < len; i++){
+        for (var i = 0, len = siteList.length; i < len; i++) {
             var site = siteList[i];
-            if (site && !_.isElement(site)){
-                return log("siteがなかった…");
+            if (site && !_.isElement(site)) {
+                return window.content.document.lastModified;
             }
             var lastModifyElement = $X('.//span[@class="f"]', site);
-            if (lastModifyElement && _.isElement(lastModifyElement[0])){
+            if (lastModifyElement && _.isElement(lastModifyElement[0])) {
                 return lastModifyElement[0].textContent;
             }
         }
@@ -63,21 +63,21 @@ function displayLastModifiedURL(){
 }
 ext.add("displayLastModified-URL",
     displayLastModifiedURL,
-    M({ja : "ページの最終更新日を表示",
-        en : "display page's last modified"}));
-function log(){
+    M({ja: "ページの最終更新日を表示",
+        en: "display page's last modified"}));
+function log() {
     var DEBUG = false;
-    if (DEBUG){
+    if (DEBUG) {
         console.log(arguments);
     }
 }
-function req(target){
+function req(target) {
     // util.message(L("通信開始"));
-    if (!target.url){
+    if (!target.url) {
         throw "target.urlがありません";
     }
     var xhr = new XMLHttpRequest();
-    xhr.onload = function(){
+    xhr.onload = function () {
         target.onload && target.onload(createHTMLDocument_XSLT(xhr.responseText));
         target.next && target.next();
     }
@@ -86,7 +86,7 @@ function req(target){
     xhr.send(null);
 }
 
-function createHTMLDocument_XSLT(source){
+function createHTMLDocument_XSLT(source) {
     var processor = new XSLTProcessor();
     var sheet = new DOMParser().parseFromString(
         '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' +
@@ -108,23 +108,23 @@ function createHTMLDocument_XSLT(source){
 // $X on XHTML
 // @target Freifox3, Chrome3, Safari4, Opera10
 // @source http://gist.github.com/184276.txt
-function $X(exp, context){
+function $X(exp, context) {
     context || (context = document);
     var _document = context.ownerDocument || context,
         documentElement = _document.documentElement,
         isXHTML = documentElement.tagName !== 'HTML' && _document.createElement('p').tagName === 'p',
         defaultPrefix = null;
-    if (isXHTML){
+    if (isXHTML) {
         defaultPrefix = '__default__';
         exp = addDefaultPrefix(exp, defaultPrefix);
     }
-    function resolver(prefix){
+    function resolver(prefix) {
         return context.lookupNamespaceURI(prefix === defaultPrefix ? null : prefix) ||
             documentElement.namespaceURI || "";
     }
 
     var result = _document.evaluate(exp, context, resolver, XPathResult.ANY_TYPE, null);
-    switch (result.resultType){
+    switch (result.resultType) {
         case XPathResult.STRING_TYPE :
             return result.stringValue;
         case XPathResult.NUMBER_TYPE :
@@ -134,7 +134,9 @@ function $X(exp, context){
         case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
             // not ensure the order.
             var ret = [], i = null;
-            while (i = result.iterateNext()) ret.push(i);
+            while (i = result.iterateNext()) {
+                ret.push(i);
+            }
             return ret;
     }
 }
